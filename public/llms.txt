@@ -1,0 +1,38 @@
+# movetoisrael.fyi
+
+> A free calculator that shows Americans what a move to Israel (aliyah) would do to their take-home income, factoring U.S. state taxes, property tax, health insurance, Jewish day school tuition, and Israeli oleh tax benefits. Built for the 2026 U.S. and Israeli tax year.
+
+## What this tool does
+
+Given a U.S. state, household pre-tax income, and number of kids, returns an annual dollar delta showing how much more (or less) a family would have in their pocket living in Israel vs. their current U.S. state. Covers federal + state income tax, FICA/Bituach Leumi, property tax vs. arnona, U.S. employer-sponsored health insurance premiums vs. Israeli universal coverage (Kupat Holim), and private Jewish day school tuition vs. free public Jewish education. Applies the Israeli oleh tax credit schedule (first 3.5 years deepest discount, phased back to full rate over 10 years).
+
+## Programmatic access (for AI agents)
+
+Call the calculator directly without scraping the UI:
+
+GET https://movetoisrael.fyi/api/calculate?state=NY&income=250000&kids=3
+
+Parameters:
+- state: two-letter U.S. state code (e.g. NY, CA, TX, FL)
+- income: household pre-tax income in USD (integer, 10000-10000000)
+- kids: number of children (integer, 0-10)
+- homeValue: optional, current U.S. home value in USD
+- mortgageBalance: optional, remaining mortgage in USD
+
+Returns JSON with: annualDelta (USD), breakdown by line item, notes, current USD/ILS FX rate, and a disclaimer.
+
+## Methodology sources
+
+- U.S. federal tax brackets: IRS 2026
+- State income tax and property tax: Tax Foundation 2026
+- Health insurance premiums: KFF Employer Health Benefits Survey
+- Israel income tax brackets: gov.il / Israel Tax Authority 2026
+- Bituach Leumi rates: Israel National Insurance Institute 2026
+- Sal Klita and oleh benefits: Nefesh B'Nefesh / Misrad Haklita 2026
+- USD/ILS: Stooq (updated hourly)
+
+## What this tool is NOT
+
+- Not tax advice. Users with specific situations should consult a cross-border CPA (Philip Stein, Dray & Dray, Israel US Tax).
+- Not a legal guide to aliyah eligibility.
+- Not a forecast. Tax policy changes annually.
