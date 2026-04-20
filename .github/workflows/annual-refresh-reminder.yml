@@ -23,7 +23,7 @@ jobs:
 
       - name: Find existing open refresh issue
         id: find
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const year = '${{ steps.year.outputs.year }}';
@@ -41,7 +41,7 @@ jobs:
       - name: Open the refresh issue if missing
         if: steps.find.outputs.result == '0'
         id: open
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const year = '${{ steps.year.outputs.year }}';
@@ -89,7 +89,7 @@ jobs:
 
       - name: Add a bump comment on the March reminder
         if: steps.find.outputs.result != '0'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const number = parseInt('${{ steps.find.outputs.result }}', 10);
