@@ -85,7 +85,7 @@ export default async function Home() {
             <span>•</span>
             <span>
               Say hi:{" "}
-              <a href="https://x.com/YOUR_HANDLE" target="_blank" rel="noopener" className="text-[#0B3E7E] hover:underline">@YOUR_HANDLE on X</a>
+              <a href="https://x.com/quietnotion" target="_blank" rel="noopener" className="text-[#0B3E7E] hover:underline">@quietnotion on X</a>
             </span>
           </div>
         </div>
