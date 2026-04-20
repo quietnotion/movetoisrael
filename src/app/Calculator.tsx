@@ -71,12 +71,21 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
                 type="text"
                 inputMode="numeric"
                 value={incomeK || ""}
-                onChange={(e) => setIncomeK(parseInt(e.target.value.replace(/\D/g, ""), 10) || 0)}
+                onChange={(e) => {
+                  let v = parseInt(e.target.value.replace(/\D/g, ""), 10) || 0;
+                  if (v >= 1000) v = Math.round(v / 1000);
+                  setIncomeK(v);
+                }}
                 className="w-full h-12 border border-[#D4D4D4] rounded-lg pl-7 pr-12 bg-white focus:outline-none focus:ring-2 focus:ring-[#FFCB05] text-base"
                 placeholder="250"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5C5C5C] pointer-events-none text-sm">K/yr</span>
             </div>
+            {incomeK > 0 && (
+              <div className="mt-1 text-xs text-[#5C5C5C] tabular-nums">
+                = ${(incomeK * 1000).toLocaleString()}/year
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-[#00274C] mb-2">Kids</label>
@@ -156,7 +165,8 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
             Sal Klita absorption basket, <span className="tabular-nums">₪{result.arrivalBonus.salKlitaNis.toLocaleString()}</span> paid across your first 6 months.
           </div>
           <div className="mt-4 text-xs sm:text-sm leading-snug">
-            Computed from <strong>Misrad Haklita</strong> (Israeli Ministry of Aliyah &amp; Integration) published rates: {CURRENT.salKlita.coupleNis.toLocaleString()} NIS baseline for a married couple, plus child supplements by age bracket. Converted at today&apos;s USD/ILS of {fxRate.toFixed(3)}.
+            Computed from <strong>Misrad Haklita</strong> (Israeli Ministry of Aliyah &amp; Integration) published rates: {CURRENT.salKlita.coupleNis.toLocaleString()} NIS baseline for a married couple, plus child supplements by age bracket. Converted at today&apos;s USD/ILS of {fxRate.toFixed(3)}.{" "}
+            <a href={result.arrivalBonus.calculatorUrl} target="_blank" rel="nofollow noopener" className="underline">Official calculator</a>.
           </div>
           <div className="mt-auto pt-5 border-t border-[#00274C]/20 text-[11px] sm:text-xs text-[#00274C]/80 leading-snug">
             <strong className="text-[#00274C]">Also included (not in this number):</strong> customs exemption on one household shipment, 500 hours of free Hebrew ulpan, year-one arnona (property tax) discount, reduced-rate mortgages, and the 10-year oleh tax benefit already baked into the annual calculation to your left.
@@ -369,6 +379,13 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
             title="Stuff that shows up free"
             body="Customs exemption on one household shipment, 500 hours of subsidized Hebrew ulpan, year-one arnona discount, reduced mortgage rates, and the Sal Klita cash in the box above."
           />
+          <IntangibleCard
+            icon={<IconHeart />}
+            title="Having a baby: free, plus they pay you"
+            body="In the U.S., even with great employer insurance, a typical birth runs about $3,000 out of pocket after copays and deductibles. Uninsured, it's $13K to $40K. In Israel the hospital bill is zero, and Bituach Leumi sends a one-time birth grant of about 1,800 NIS (~$600) for your first kid, plus paid maternity leave at full salary for 15 weeks."
+            source="KFF Peterson Health System Tracker"
+            sourceUrl="https://www.healthsystemtracker.org/brief/health-costs-associated-with-pregnancy-childbirth-and-postpartum-care/"
+          />
         </div>
       </div>
 
@@ -391,12 +408,21 @@ function LabeledMoneyK({ label, value, onChange, placeholder }: { label: string;
           type="text"
           inputMode="numeric"
           value={value || ""}
-          onChange={(e) => onChange(parseInt(e.target.value.replace(/\D/g, ""), 10) || 0)}
+          onChange={(e) => {
+            let v = parseInt(e.target.value.replace(/\D/g, ""), 10) || 0;
+            if (v >= 1000) v = Math.round(v / 1000);
+            onChange(v);
+          }}
           className="w-full h-12 border border-[#D4D4D4] rounded-lg pl-7 pr-10 bg-white focus:outline-none focus:ring-2 focus:ring-[#FFCB05] text-base"
           placeholder={placeholder}
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5C5C5C] pointer-events-none text-sm">K</span>
       </div>
+      {value > 0 && (
+        <div className="mt-1 text-xs text-[#5C5C5C] tabular-nums">
+          = ${(value * 1000).toLocaleString()}
+        </div>
+      )}
     </div>
   );
 }
@@ -414,7 +440,7 @@ function IntangibleCard({ icon, title, body, source, sourceUrl }: { icon: React.
           <div className="mt-2 text-[11px] text-[#5C5C5C]">
             Source:{" "}
             {sourceUrl ? (
-              <a href={sourceUrl} target="_blank" rel="noopener" className="text-[#0B3E7E] hover:underline">{source}</a>
+              <a href={sourceUrl} target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] hover:underline">{source}</a>
             ) : (
               source
             )}
