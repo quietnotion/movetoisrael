@@ -49,7 +49,9 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
         kids: String(kids),
         track: "1",
       });
-      fetch(`/api/calculate?${qs.toString()}`).catch(() => {});
+      fetch(`/api/calculate?${qs.toString()}`).catch((err) => {
+        console.warn("[Calculator] track ping failed:", err);
+      });
     }, 5000);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps

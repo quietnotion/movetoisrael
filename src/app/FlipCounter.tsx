@@ -34,7 +34,9 @@ export function FlipCounter({ initialTotal }: { initialTotal: number }) {
         if (!res.ok) return;
         const data = await res.json();
         if (!cancelled && typeof data.total === "number") setTotal(data.total);
-      } catch {}
+      } catch (err) {
+        console.warn("[FlipCounter] stats poll failed:", err);
+      }
     };
     const id = setInterval(poll, 60_000);
     return () => {
