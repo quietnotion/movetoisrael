@@ -10,34 +10,37 @@ export type Inputs = {
   kidsAges?: number[];
 };
 
-export type Breakdown = {
+export type Row = {
   label: string;
   us: number;
   il: number;
+  delta: number;
   note?: string;
+  onlyIfKids?: boolean;
 };
 
 export type CalcResult = {
   annualDelta: number;
   usNet: number;
   ilNet: number;
-  breakdown: Breakdown[];
+  rows: Row[];
   notes: string[];
   taxYear: number;
   lastReviewed: string;
   isWorseOff: boolean;
   forwardFraming?: string;
-  salKlitaEstimateUsd: number;
+  arrivalBonus: {
+    salKlitaUsd: number;
+    nbnGrantUsd: number;
+    totalUsd: number;
+  };
 };
 
 function applyBrackets(taxable: number, brackets: Array<{ cap: number; rate: number }>): number {
   let tax = 0;
   let prev = 0;
   for (const { cap, rate } of brackets) {
-    if (taxable <= cap) {
-      tax += (taxable - prev) * rate;
-      break;
-    }
+    if (taxable <= cap) { tax += (taxable - prev) * rate; break; }
     tax += (cap - prev) * rate;
     prev = cap;
   }
@@ -56,8 +59,7 @@ function usFicaTax(income: number): number {
   const ss = Math.min(income, f.ssWageBase) * f.ssRate;
   const medicare = income * f.medicareRate;
   const addl = income > f.additionalMedicareThreshold
-    ? (income - f.additionalMedicareThreshold) * f.additionalMedicareRate
-    : 0;
+    ? (income - f.additionalMedicareThreshold) * f.additionalMedicareRate : 0;
   return ss + medicare + addl;
 }
 
@@ -67,11 +69,7 @@ function usStateTax(income: number, state: StateCode): number {
 
 function ilIncomeTaxGross(incomeUsd: number, ilsPerUsd: number): number {
   const incomeIls = incomeUsd * ilsPerUsd;
-  const taxIls = applyBrackets(
-    incomeIls,
-    CURRENT.israel.incomeTaxBracketsIls as Array<{ cap: number; rate: number }>
-  );
-  return taxIls / ilsPerUsd;
+  return applyBrackets(incomeIls, CURRENT.israel.incomeTaxBracketsIls as Array<{ cap: number; rate: number }>) / ilsPerUsd;
 }
 
 function bituachLeumi(incomeUsd: number, ilsPerUsd: number): number {
@@ -79,12 +77,11 @@ function bituachLeumi(incomeUsd: number, ilsPerUsd: number): number {
   const monthlyIls = (incomeUsd * ilsPerUsd) / 12;
   const low = Math.min(monthlyIls, bl.lowTierMonthlyIls) * bl.lowRate;
   const high = monthlyIls > bl.lowTierMonthlyIls
-    ? (Math.min(monthlyIls, bl.monthlyCapIls) - bl.lowTierMonthlyIls) * bl.highRate
-    : 0;
+    ? (Math.min(monthlyIls, bl.monthlyCapIls) - bl.lowTierMonthlyIls) * bl.highRate : 0;
   return ((low + high) * 12) / ilsPerUsd;
 }
 
-function ilIncomeTaxWithOlehBenefits(incomeUsd: number, ilsPerUsd: number): number {
+function ilIncomeTaxWithOleh(incomeUsd: number, ilsPerUsd: number): number {
   return ilIncomeTaxGross(incomeUsd, ilsPerUsd) * CURRENT.israel.olehTaxDiscountMultiplier;
 }
 
@@ -92,7 +89,7 @@ function usPropertyTax(homeValue: number, state: StateCode): number {
   return homeValue * STATES[state].avgPropertyTaxRate;
 }
 
-function usHealthPremium(state: StateCode, kids: number, income: number): number {
+function usHealthCostOutOfPocket(state: StateCode, kids: number, income: number): number {
   const base = STATES[state].avgHealthPremiumFamily;
   const share = kids > 0 || income < 150000
     ? CURRENT.costs.healthInsuranceEmployeeShareWithKids
@@ -113,79 +110,91 @@ function ilArnona(homeValueUsd: number): number {
   return Math.min(c.ilArnonaCapUsd, c.ilArnonaBaseUsd + homeValueUsd * c.ilArnonaPerHomeValue);
 }
 
-function salKlitaFirstYear(kids: number): number {
+function arrivalBonus(kids: number) {
   const s = CURRENT.salKlita;
-  return s.perCoupleUsd + s.perChildUsd * kids;
+  const n = CURRENT.nefeshBnefesh;
+  const salKlitaUsd = s.perCoupleUsd + s.perChildUsd * kids;
+  const nbnGrantUsd = n.grantPerAdultUsd * 2 + n.grantPerChildUsd * kids;
+  return {
+    salKlitaUsd: Math.round(salKlitaUsd),
+    nbnGrantUsd: Math.round(nbnGrantUsd),
+    totalUsd: Math.round(salKlitaUsd + nbnGrantUsd),
+  };
 }
 
 export function calculate(inputs: Inputs, fxRate?: number): CalcResult {
   const { state, householdIncome, kids, homeValue = 0, kidsAges } = inputs;
   const ilsPerUsd = fxRate ?? CURRENT.israel.ilsPerUsdFallback;
 
-  const usFed = usFederalTax(householdIncome, kids);
-  const usFica = usFicaTax(householdIncome);
-  const usState = usStateTax(householdIncome, state);
-  const usHealth = usHealthPremium(state, kids, householdIncome);
-  const usPropTax = usPropertyTax(homeValue, state);
+  const usIncomeTaxTotal = usFederalTax(householdIncome, kids) + usStateTax(householdIncome, state) + usFicaTax(householdIncome);
+  const ilIncomeTaxTotal = ilIncomeTaxWithOleh(householdIncome, ilsPerUsd) + bituachLeumi(householdIncome, ilsPerUsd);
+
+  const usHealth = usHealthCostOutOfPocket(state, kids, householdIncome);
+  const usProp = usPropertyTax(homeValue, state);
+  const ilArn = homeValue > 0 ? ilArnona(homeValue) : 0;
   const usSchool = usJewishDaySchool(kids, kidsAges);
+  const usCollege = kids * CURRENT.college.usAnnualSavingsPerKidUsd;
+  const ilCollege = kids * CURRENT.college.ilAnnualSavingsPerKidUsd;
 
-  const ilTax = ilIncomeTaxWithOlehBenefits(householdIncome, ilsPerUsd);
-  const ilBL = bituachLeumi(householdIncome, ilsPerUsd);
-  const ilArn = ilArnona(homeValue);
+  const rows: Row[] = [
+    {
+      label: "Income tax + payroll",
+      us: usIncomeTaxTotal,
+      il: ilIncomeTaxTotal,
+      delta: usIncomeTaxTotal - ilIncomeTaxTotal,
+      note: `U.S. column combines federal + state + FICA. Israel column combines income tax (with ${Math.round((1 - CURRENT.israel.olehTaxDiscountMultiplier) * 100)}% oleh discount, first ${CURRENT.israel.olehDiscountYearsFullBenefit} years) + Bituach Leumi. As a U.S. citizen you still file with the IRS, but the Foreign Earned Income Exclusion and Foreign Tax Credit usually eliminate U.S. tax owed.`,
+    },
+    {
+      label: "Health insurance (out of your paycheck)",
+      us: usHealth,
+      il: 0,
+      delta: usHealth,
+      note: "Israel's universal healthcare (Kupat Holim) is funded by Bituach Leumi above. You pay nothing extra out of pocket for basic coverage.",
+    },
+    {
+      label: "Property tax / Arnona",
+      us: usProp,
+      il: ilArn,
+      delta: usProp - ilArn,
+    },
+    {
+      label: "Private Jewish day school",
+      us: usSchool,
+      il: 0,
+      delta: usSchool,
+      onlyIfKids: true,
+      note: "Israeli public schools are Jewish by default — calendar, Hebrew, Torah. No tuition required to raise Jewish kids.",
+    },
+    {
+      label: "College savings (needed per year)",
+      us: usCollege,
+      il: ilCollege,
+      delta: usCollege - ilCollege,
+      onlyIfKids: true,
+      note: `U.S. private 4-year college all-in is roughly $250K per kid in today's dollars; funding it from birth requires ~$${CURRENT.college.usAnnualSavingsPerKidUsd.toLocaleString()}/yr/kid. Israeli public university costs ~$3K/yr in tuition and takes 3–4 years; a modest ~$${CURRENT.college.ilAnnualSavingsPerKidUsd.toLocaleString()}/yr/kid covers it.`,
+    },
+  ];
 
-  const usTotal = usFed + usFica + usState + usHealth + usPropTax + usSchool;
-  const ilTotal = ilTax + ilBL + ilArn;
-
+  const usTotal = usIncomeTaxTotal + usHealth + usProp + usSchool + usCollege;
+  const ilTotal = ilIncomeTaxTotal + ilArn + ilCollege;
   const usNet = householdIncome - usTotal;
   const ilNet = householdIncome - ilTotal;
   const annualDelta = ilNet - usNet;
 
-  const breakdown: Breakdown[] = [
-    {
-      label: "Federal income tax",
-      us: usFed,
-      il: 0,
-      note: "As a U.S. citizen you still file with the IRS. The Foreign Earned Income Exclusion and Foreign Tax Credit usually eliminate U.S. tax owed.",
-    },
-    { label: "State income tax", us: usState, il: 0 },
-    { label: "Payroll (FICA / Bituach Leumi)", us: usFica, il: ilBL },
-    {
-      label: "Israel income tax",
-      us: 0,
-      il: ilTax,
-      note: `Includes ${Math.round((1 - CURRENT.israel.olehTaxDiscountMultiplier) * 100)}% oleh immigrant discount (first ~${CURRENT.israel.olehDiscountYearsFullBenefit} years). Phased back to full rate across ${CURRENT.israel.olehDiscountYearsTotal} years.`,
-    },
-    {
-      label: "Health insurance premium",
-      us: usHealth,
-      il: 0,
-      note: "Israel's universal healthcare (Kupat Holim) is funded by Bituach Leumi above. No separate employer-sponsored premium.",
-    },
-    { label: "Property tax / Arnona", us: usPropTax, il: homeValue > 0 ? ilArn : 0 },
-    {
-      label: "Private Jewish day school tuition",
-      us: usSchool,
-      il: 0,
-      note: "Israeli public schools are Jewish by default. No tuition required to raise Jewish kids.",
-    },
-  ];
-
   const notes: string[] = [
-    `Based on U.S. federal and Israel ${CURRENT.year} tax year. Data last reviewed ${CURRENT.lastReviewed}.`,
-    `USD→ILS conversion at ${ilsPerUsd.toFixed(3)} (live via Stooq, hourly).`,
-    `Assumes a married-filing-jointly U.S. household for simplicity.`,
-    `Israel column includes the ${CURRENT.israel.olehDiscountYearsTotal}-year oleh benefit schedule.`,
+    `U.S. federal + Israel ${CURRENT.year} tax year, last reviewed ${CURRENT.lastReviewed}.`,
+    `Live USD→ILS conversion at ${ilsPerUsd.toFixed(3)} (Stooq, cached 1 hour).`,
+    `Married-filing-jointly U.S. household assumed. Single / dual-earner numbers vary but land in a similar neighborhood.`,
+    `Israel income tax column reflects the ${CURRENT.israel.olehDiscountYearsFullBenefit}-year deep-discount phase of the oleh benefit; the ${CURRENT.israel.olehDiscountYearsTotal}-year total ramp brings it to the full rate over time.`,
   ];
-
-  const salKlitaEstimateUsd = salKlitaFirstYear(kids);
 
   const isWorseOff = annualDelta < 0;
   let forwardFraming: string | undefined;
   if (isWorseOff) {
     if (kids === 0) {
-      forwardFraming = `With no kids today and no homeownership assumed, the pure tax math runs $${Math.abs(Math.round(annualDelta)).toLocaleString()} against you. Add one child to the picture — Jewish day school averages $${CURRENT.costs.jewishDaySchoolPerKidUsAvg.toLocaleString()}/kid/year in the U.S., $0 in Israel — and the math flips. The intangibles below are also where the case lives for someone with your profile.`;
+      forwardFraming = `With no kids and no homeownership, the straight tax math runs $${Math.abs(Math.round(annualDelta)).toLocaleString()} against you on paper — Israeli marginal rates are high. Add one child and the math flips hard: Jewish day school runs $${CURRENT.costs.jewishDaySchoolPerKidUsAvg.toLocaleString()}/yr/kid in the U.S. and college savings another $${CURRENT.college.usAnnualSavingsPerKidUsd.toLocaleString()}/yr/kid, both of which disappear in Israel. If you're thinking about family life, the math is working for you.`;
     } else {
-      forwardFraming = `Your current tax situation is unusually favorable and the financial case is close to neutral on paper. Look at the intangibles — Israel's top-10 happiness ranking, universal healthcare that's not tied to your job, kids growing up bilingual in a Jewish-majority society. That's the real case for your profile.`;
+      forwardFraming = `Your U.S. tax profile is unusually favorable and the pure tax line is close to neutral. The case for moving lives in everything else — universal healthcare that isn't tied to your job, kids who grow up bilingual in a Jewish-majority society, and the cash Israel hands you on arrival.`;
     }
   }
 
@@ -193,12 +202,12 @@ export function calculate(inputs: Inputs, fxRate?: number): CalcResult {
     annualDelta: Math.round(annualDelta),
     usNet: Math.round(usNet),
     ilNet: Math.round(ilNet),
-    breakdown: breakdown.map((b) => ({ ...b, us: Math.round(b.us), il: Math.round(b.il) })),
+    rows: rows.map((r) => ({ ...r, us: Math.round(r.us), il: Math.round(r.il), delta: Math.round(r.delta) })),
     notes,
     taxYear: CURRENT.year,
     lastReviewed: CURRENT.lastReviewed,
     isWorseOff,
     forwardFraming,
-    salKlitaEstimateUsd,
+    arrivalBonus: arrivalBonus(kids),
   };
 }

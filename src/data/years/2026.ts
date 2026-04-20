@@ -59,6 +59,22 @@ export const YEAR_2026 = {
     source: "https://www.nbn.org.il/life-in-israel/government-services/rights-and-benefits/sal-klita-calculator/",
   },
 
+  nefeshBnefesh: {
+    grantPerAdultUsd: 1500,
+    grantPerChildUsd: 500,
+    source: "https://www.nbn.org.il/aliyah-rights-and-benefits/",
+  },
+
+  college: {
+    usAnnualSavingsPerKidUsd: 10000,
+    ilAnnualSavingsPerKidUsd: 800,
+    note: "US: average private 4-yr college ~$250K all-in, needs ~$10K/yr/kid from birth to fund. Israel: public university ~$3K/yr tuition, covered by ~$800/yr/kid savings.",
+    sources: [
+      "https://research.collegeboard.org/trends/college-pricing",
+      "https://www.gov.il/en/departments/ministry_of_education",
+    ],
+  },
+
   costs: {
     jewishDaySchoolPerKidUsAvg: 28000,
     healthInsuranceFamilyUsAvg: 24600,
