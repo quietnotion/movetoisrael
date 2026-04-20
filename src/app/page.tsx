@@ -1,4 +1,5 @@
 import Calculator from "./Calculator";
+import { FlipCounter } from "./FlipCounter";
 import { getUsdIlsRate } from "@/lib/fx";
 import { getTotalCount } from "@/lib/counter";
 import { CURRENT } from "@/data/current";
@@ -15,10 +16,13 @@ export default async function Home() {
     <main className="min-h-screen">
       <header className="bg-[#00274C] text-white">
         <div className="max-w-4xl mx-auto px-5 py-10 md:py-16">
-          <div className="inline-flex items-center gap-2 bg-[#FFCB05] text-[#00274C] text-xs font-bold uppercase tracking-wider px-3 py-1 rounded">
-            <span>U.S. &amp; Israel {CURRENT.year} tax year</span>
-            <span className="opacity-60">•</span>
-            <span className="font-normal lowercase tracking-normal">updated {CURRENT.lastReviewed}</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-2 bg-[#FFCB05] text-[#00274C] text-xs font-bold uppercase tracking-wider px-3 py-1 rounded">
+              <span>U.S. &amp; Israel {CURRENT.year} tax year</span>
+              <span className="opacity-60">•</span>
+              <span className="font-normal lowercase tracking-normal">updated {CURRENT.lastReviewed}</span>
+            </div>
+            <FlipCounter initialTotal={totalCount} />
           </div>
           <h1 className="mt-5 font-[family-name:var(--font-merriweather)] text-3xl md:text-5xl font-black leading-tight">
             What would moving to Israel actually mean for your money?
@@ -27,7 +31,7 @@ export default async function Home() {
             Plug in your state, your income, and your kids. Get a straight-dollars answer. Not a pitch, not a guilt trip, not a vibe.
           </p>
           <p className="mt-3 text-sm text-white/60">
-            A plain-English aliyah calculator built by Americans for Americans. USD→ILS rate live at {fxRate.toFixed(2)}.{totalCount > 0 ? ` ${totalCount.toLocaleString()} calculations run so far.` : ""}
+            A plain-English aliyah calculator built by Americans for Americans. USD→ILS rate live at {fxRate.toFixed(2)}.
           </p>
         </div>
       </header>
