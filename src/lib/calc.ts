@@ -31,9 +31,9 @@ export type CalcResult = {
   forwardFraming?: string;
   arrivalBonus: {
     salKlitaUsd: number;
-    nbnGrantUsd: number;
-    totalUsd: number;
+    calculatorUrl: string;
   };
+  totals: { us: number; il: number; delta: number };
 };
 
 function applyBrackets(taxable: number, brackets: Array<{ cap: number; rate: number }>): number {
@@ -112,13 +112,10 @@ function ilArnona(homeValueUsd: number): number {
 
 function arrivalBonus(kids: number) {
   const s = CURRENT.salKlita;
-  const n = CURRENT.nefeshBnefesh;
   const salKlitaUsd = s.perCoupleUsd + s.perChildUsd * kids;
-  const nbnGrantUsd = n.grantPerAdultUsd * 2 + n.grantPerChildUsd * kids;
   return {
     salKlitaUsd: Math.round(salKlitaUsd),
-    nbnGrantUsd: Math.round(nbnGrantUsd),
-    totalUsd: Math.round(salKlitaUsd + nbnGrantUsd),
+    calculatorUrl: s.officialCalculatorUrl,
   };
 }
 
@@ -209,5 +206,10 @@ export function calculate(inputs: Inputs, fxRate?: number): CalcResult {
     isWorseOff,
     forwardFraming,
     arrivalBonus: arrivalBonus(kids),
+    totals: {
+      us: Math.round(usTotal),
+      il: Math.round(ilTotal),
+      delta: Math.round(usTotal - ilTotal),
+    },
   };
 }

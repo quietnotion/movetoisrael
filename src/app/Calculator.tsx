@@ -17,11 +17,15 @@ const fmt = (n: number) =>
 
 export default function Calculator({ fxRate }: { fxRate: number }) {
   const [state, setState] = useState<StateCode>("NY");
-  const [income, setIncome] = useState<number>(250000);
+  const [incomeK, setIncomeK] = useState<number>(250);
   const [kids, setKids] = useState<number>(2);
   const [showRefine, setShowRefine] = useState(false);
-  const [homeValue, setHomeValue] = useState<number>(0);
-  const [mortgageBalance, setMortgageBalance] = useState<number>(0);
+  const [homeValueK, setHomeValueK] = useState<number>(0);
+  const [mortgageBalanceK, setMortgageBalanceK] = useState<number>(0);
+
+  const income = incomeK * 1000;
+  const homeValue = homeValueK * 1000;
+  const mortgageBalance = mortgageBalanceK * 1000;
 
   const result = useMemo(
     () =>
@@ -46,25 +50,26 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
             <select
               value={state}
               onChange={(e) => setState(e.target.value as StateCode)}
-              className="w-full border border-[#D4D4D4] rounded-lg px-3 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-[#FFCB05] text-[#1A1A1A] text-base"
+              className="w-full h-12 border border-[#D4D4D4] rounded-lg px-3 bg-white focus:outline-none focus:ring-2 focus:ring-[#FFCB05] text-[#1A1A1A] text-base appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22 fill=%22none%22 stroke=%22%2300274C%22 stroke-width=%222%22><path d=%22M1 1l5 5 5-5%22/></svg>')] bg-no-repeat bg-[right_0.75rem_center] pr-9"
             >
               {STATE_OPTIONS.map((s) => <option key={s.code} value={s.code}>{s.name}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-[#00274C] mb-2">
-              Household income <span className="text-[#5C5C5C] font-normal">(pre-tax)</span>
+              Household income <span className="text-[#5C5C5C] font-normal">(pre-tax, in thousands)</span>
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5C5C5C]">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5C5C5C] pointer-events-none">$</span>
               <input
-                type="number"
+                type="text"
                 inputMode="numeric"
-                value={income || ""}
-                onChange={(e) => setIncome(parseInt(e.target.value, 10) || 0)}
-                className="w-full border border-[#D4D4D4] rounded-lg pl-7 pr-3 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-[#FFCB05] text-base"
-                placeholder="250,000"
+                value={incomeK || ""}
+                onChange={(e) => setIncomeK(parseInt(e.target.value.replace(/\D/g, ""), 10) || 0)}
+                className="w-full h-12 border border-[#D4D4D4] rounded-lg pl-7 pr-12 bg-white focus:outline-none focus:ring-2 focus:ring-[#FFCB05] text-base"
+                placeholder="250"
               />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5C5C5C] pointer-events-none text-sm">K/yr</span>
             </div>
           </div>
           <div>
@@ -72,7 +77,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
             <select
               value={kids}
               onChange={(e) => setKids(parseInt(e.target.value, 10))}
-              className="w-full border border-[#D4D4D4] rounded-lg px-3 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-[#FFCB05] text-base"
+              className="w-full h-12 border border-[#D4D4D4] rounded-lg px-3 bg-white focus:outline-none focus:ring-2 focus:ring-[#FFCB05] text-base appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22 fill=%22none%22 stroke=%22%2300274C%22 stroke-width=%222%22><path d=%22M1 1l5 5 5-5%22/></svg>')] bg-no-repeat bg-[right_0.75rem_center] pr-9"
             >
               {[0,1,2,3,4,5,6].map((n) => <option key={n} value={n}>{n}{n === 6 ? "+" : ""}</option>)}
             </select>
@@ -88,8 +93,8 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
 
         {showRefine && (
           <div className="mt-4 grid md:grid-cols-2 gap-4 pt-4 border-t border-[#E5E5E5]">
-            <LabeledMoney label="U.S. home value" value={homeValue} onChange={setHomeValue} placeholder="650,000" />
-            <LabeledMoney label="Mortgage balance" value={mortgageBalance} onChange={setMortgageBalance} placeholder="380,000" />
+            <LabeledMoneyK label="U.S. home value" value={homeValueK} onChange={setHomeValueK} placeholder="650" />
+            <LabeledMoneyK label="Mortgage balance" value={mortgageBalanceK} onChange={setMortgageBalanceK} placeholder="380" />
           </div>
         )}
       </div>
@@ -97,17 +102,17 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
       {/* HERO RESULT — two boxes */}
       <div className="mt-6 sm:mt-8 grid lg:grid-cols-[3fr_2fr] gap-4 sm:gap-5">
         {/* Left: Annual difference */}
-        <div className="rounded-2xl overflow-hidden bg-[#00274C] text-white p-6 sm:p-8 lg:p-10">
-          <div className="text-xs sm:text-sm font-bold text-[#FFCB05] tracking-widest uppercase mb-3">
+        <div className="rounded-2xl overflow-hidden bg-[#00274C] text-white p-6 sm:p-8 lg:p-10 flex flex-col">
+          <div className="text-xs sm:text-sm font-bold text-[#FFCB05] tracking-widest uppercase">
             Every year, for life
           </div>
-          <div className="font-[family-name:var(--font-merriweather)] font-black leading-none text-[min(18vw,5.5rem)] md:text-[6rem] lg:text-[min(9vw,6rem)]">
+          <div className="my-5 sm:my-6 font-[family-name:var(--font-merriweather)] font-black leading-none text-[min(18vw,5.5rem)] md:text-[5.5rem] lg:text-[min(8vw,5.5rem)]">
             {betterOff ? "+" : "−"}{fmt(bigNumber)}
           </div>
-          <div className="mt-3 text-base sm:text-lg text-[#FFCB05]">
+          <div className="text-base sm:text-lg text-[#FFCB05]">
             {betterOff ? "more" : "less"} in your pocket — living in Israel
           </div>
-          <div className="mt-5 grid grid-cols-2 gap-3">
+          <div className="mt-6 grid grid-cols-2 gap-3">
             <div className="bg-white/10 rounded-lg p-3 sm:p-4">
               <div className="text-white/60 uppercase tracking-wide text-[10px] sm:text-xs mb-1">Net in U.S.</div>
               <div className="text-lg sm:text-xl font-bold tabular-nums">{fmt(result.usNet)}<span className="text-sm font-normal text-white/60">/yr</span></div>
@@ -121,27 +126,23 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
 
         {/* Right: What Israel hands you */}
         <div className="rounded-2xl overflow-hidden bg-[#FFCB05] text-[#00274C] p-6 sm:p-8 lg:p-10 flex flex-col">
-          <div className="text-xs sm:text-sm font-bold tracking-widest uppercase mb-3">
-            On arrival, one-time cash
+          <div className="text-xs sm:text-sm font-bold tracking-widest uppercase">
+            On arrival, from the government
           </div>
-          <div className="font-[family-name:var(--font-merriweather)] font-black leading-none text-[min(14vw,4rem)] md:text-5xl lg:text-[min(6.5vw,4.5rem)]">
-            +{fmt(result.arrivalBonus.totalUsd)}
+          <div className="my-5 sm:my-6 font-[family-name:var(--font-merriweather)] font-black leading-none text-[min(16vw,4.5rem)] md:text-[4.5rem] lg:text-[min(7vw,4.5rem)]">
+            ~{fmt(result.arrivalBonus.salKlitaUsd)}
           </div>
-          <div className="mt-3 text-sm sm:text-base font-medium">
-            Israel hands you this when you land
+          <div className="text-sm sm:text-base font-medium">
+            Sal Klita absorption basket, paid across your first 6 months.
           </div>
-          <div className="mt-5 space-y-2 text-xs sm:text-sm">
-            <div className="flex justify-between items-baseline border-b border-[#00274C]/15 pb-2">
-              <span>Sal Klita (absorption basket)</span>
-              <span className="font-bold tabular-nums">{fmt(result.arrivalBonus.salKlitaUsd)}</span>
-            </div>
-            <div className="flex justify-between items-baseline">
-              <span>Nefesh B&apos;Nefesh grant</span>
-              <span className="font-bold tabular-nums">{fmt(result.arrivalBonus.nbnGrantUsd)}</span>
-            </div>
+          <div className="mt-4 text-xs sm:text-sm leading-snug">
+            Paid by <strong>Misrad Haklita</strong> (the Israeli Ministry of Aliyah &amp; Integration). Amount scales with family size and age of children — this is an estimate.{" "}
+            <a href={result.arrivalBonus.calculatorUrl} target="_blank" rel="noopener" className="underline font-semibold">
+              Get your exact figure
+            </a>.
           </div>
-          <div className="mt-auto pt-4 text-[11px] sm:text-xs text-[#00274C]/70 leading-snug">
-            Plus: customs exemption on one shipment, free Hebrew ulpan (500 hrs), year-one arnona discount.
+          <div className="mt-auto pt-5 border-t border-[#00274C]/20 text-[11px] sm:text-xs text-[#00274C]/80 leading-snug">
+            <strong className="text-[#00274C]">Not in this number (but included):</strong> customs exemption on one household shipment, 500 hours of free Hebrew ulpan, year-one arnona (property tax) discount, reduced-rate mortgages, and a 10-year tax benefit already baked into the calculation above.
           </div>
         </div>
       </div>
@@ -200,6 +201,26 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
                   </tr>
                 );
               })}
+              <tr className="bg-[#00274C] text-white font-bold">
+                <td className="px-5 py-4">Total coming out of your paycheck / year</td>
+                <td className="px-5 py-4 text-right tabular-nums">{fmt(result.totals.us)}</td>
+                <td className="px-5 py-4 text-right tabular-nums">{fmt(result.totals.il)}</td>
+                <td className="px-5 py-4 text-right tabular-nums">
+                  {result.totals.delta > 0 ? (
+                    <span className="inline-block bg-[#FFCB05] text-[#00274C] px-2 py-1 rounded">+{fmt(result.totals.delta)}</span>
+                  ) : (
+                    <span>−{fmt(Math.abs(result.totals.delta))}</span>
+                  )}
+                </td>
+              </tr>
+              <tr className="bg-[#FFCB05]/20 text-[#00274C]">
+                <td className="px-5 py-3 text-sm italic">Net cash in your pocket (after everything above) — matches the big number at top</td>
+                <td className="px-5 py-3 text-right tabular-nums font-semibold">{fmt(result.usNet)}</td>
+                <td className="px-5 py-3 text-right tabular-nums font-semibold">{fmt(result.ilNet)}</td>
+                <td className="px-5 py-3 text-right tabular-nums font-black">
+                  {result.annualDelta >= 0 ? "+" : "−"}{fmt(Math.abs(result.annualDelta))}
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -235,6 +256,32 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
               </div>
             );
           })}
+          <div className="bg-[#00274C] text-white rounded-xl p-4">
+            <div className="text-[10px] uppercase tracking-widest text-[#FFCB05] mb-2 font-bold">Totals reconcile to the hero number</div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <div className="text-white/60 text-[10px] uppercase">Out / yr · U.S.</div>
+                <div className="tabular-nums font-bold">{fmt(result.totals.us)}</div>
+              </div>
+              <div>
+                <div className="text-white/60 text-[10px] uppercase">Out / yr · Israel</div>
+                <div className="tabular-nums font-bold">{fmt(result.totals.il)}</div>
+              </div>
+              <div>
+                <div className="text-white/60 text-[10px] uppercase">Net / yr · U.S.</div>
+                <div className="tabular-nums font-semibold">{fmt(result.usNet)}</div>
+              </div>
+              <div>
+                <div className="text-[#FFCB05] text-[10px] uppercase">Net / yr · Israel</div>
+                <div className="tabular-nums font-semibold">{fmt(result.ilNet)}</div>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-white/20 text-center">
+              <span className="font-[family-name:var(--font-merriweather)] font-black text-2xl text-[#FFCB05]">
+                {result.annualDelta >= 0 ? "+" : "−"}{fmt(Math.abs(result.annualDelta))}/yr
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -295,20 +342,23 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
   );
 }
 
-function LabeledMoney({ label, value, onChange, placeholder }: { label: string; value: number; onChange: (n: number) => void; placeholder: string }) {
+function LabeledMoneyK({ label, value, onChange, placeholder }: { label: string; value: number; onChange: (n: number) => void; placeholder: string }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-[#00274C] mb-2">{label}</label>
+      <label className="block text-sm font-medium text-[#00274C] mb-2">
+        {label} <span className="text-[#5C5C5C] font-normal">(in thousands)</span>
+      </label>
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5C5C5C]">$</span>
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5C5C5C] pointer-events-none">$</span>
         <input
-          type="number"
+          type="text"
           inputMode="numeric"
           value={value || ""}
-          onChange={(e) => onChange(parseInt(e.target.value, 10) || 0)}
-          className="w-full border border-[#D4D4D4] rounded-lg pl-7 pr-3 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-[#FFCB05] text-base"
+          onChange={(e) => onChange(parseInt(e.target.value.replace(/\D/g, ""), 10) || 0)}
+          className="w-full h-12 border border-[#D4D4D4] rounded-lg pl-7 pr-10 bg-white focus:outline-none focus:ring-2 focus:ring-[#FFCB05] text-base"
           placeholder={placeholder}
         />
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5C5C5C] pointer-events-none text-sm">K</span>
       </div>
     </div>
   );

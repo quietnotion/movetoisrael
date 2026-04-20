@@ -49,20 +49,19 @@ export const YEAR_2026 = {
   },
 
   salKlita: {
-    perSinglePersonUsd: 3800,
-    perCoupleUsd: 6200,
-    perChildUsd: 2400,
+    // Source: Misrad Haklita (Israeli Ministry of Aliyah & Integration) rates,
+    // indexed annually. 2025 rates: single oleh 21,194 NIS; payments are 6 monthly
+    // installments + airport cash + bank transfer. Family totals scale with kids
+    // by age. Estimates below average across age brackets at ILS 2.99/USD.
+    perSinglePersonUsd: 7000,
+    perCoupleUsd: 10500,
+    perChildUsd: 3000,
     customsExemptionYears: 3,
     arnonaDiscountYear1Percent: 0.90,
     arnonaDiscountYear2to3Percent: 0.75,
     ulpanHoursFree: 500,
-    source: "https://www.nbn.org.il/life-in-israel/government-services/rights-and-benefits/sal-klita-calculator/",
-  },
-
-  nefeshBnefesh: {
-    grantPerAdultUsd: 1500,
-    grantPerChildUsd: 500,
-    source: "https://www.nbn.org.il/aliyah-rights-and-benefits/",
+    officialCalculatorUrl: "https://www.nbn.org.il/life-in-israel/government-services/rights-and-benefits/sal-klita-calculator/",
+    source: "https://www.gov.il/en/departments/general/absorption_basket",
   },
 
   college: {
