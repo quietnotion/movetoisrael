@@ -48,16 +48,16 @@ export function FlipCounter({ initialTotal }: { initialTotal: number }) {
 
   return (
     <div className="inline-flex items-center gap-2 bg-black/40 ring-1 ring-[#FFCB05]/30 rounded px-3 py-1 text-[#FFCB05]">
-      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/70">
-        Runs
-      </span>
-      <div className="flex gap-[2px]" aria-live="polite" aria-label={`${total} calculations run`}>
+      <div className="flex gap-[2px]" aria-live="polite" aria-label={`${total} Americans helped`}>
         {digits.map((d, i) =>
           /[0-9]/.test(d) ? <FlipDigit key={i} digit={d} /> : (
             <span key={i} className="text-[#FFCB05]/80 px-[1px] text-sm font-bold leading-none self-center">{d}</span>
           )
         )}
       </div>
+      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/70">
+        Americans helped
+      </span>
     </div>
   );
 }
