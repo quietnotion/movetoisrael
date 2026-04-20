@@ -25,7 +25,7 @@ export const YEAR_2026 = {
   },
 
   israel: {
-    ilsPerUsdFallback: 3.7,
+    ilsPerUsdFallback: 3.00,
     incomeTaxBracketsIls: [
       { cap: 84120, rate: 0.10 },
       { cap: 120720, rate: 0.14 },

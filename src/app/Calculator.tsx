@@ -367,7 +367,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
           <IntangibleCard
             icon={<IconHome />}
             title="Being Jewish stops being a project"
-            body="In Israel you're not explaining Hanukkah to coworkers, scheduling around holidays that aren't on the office calendar, or paying $28K/year so your kids know what Shabbat is. Jewish life is the shared rhythm of the country, not a side project you run in the margins."
+            body="In Israel you're not explaining Yom Kippur to coworkers, scheduling around holidays that aren't on the office calendar, or paying $28K/year so your kids grow up fluent in the tradition. Jewish life is the shared rhythm of the country, not a side project you run in the margins."
           />
           <IntangibleCard
             icon={<IconBus />}
