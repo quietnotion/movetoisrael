@@ -68,6 +68,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
           <div>
             <label className="block text-sm font-medium text-[#00274C] mb-2">Your U.S. state</label>
             <select
+              aria-label="Your U.S. state"
               value={state}
               onChange={(e) => setState(e.target.value as StateCode)}
               className="w-full h-12 border border-[#D4D4D4] rounded-lg px-3 bg-white focus:outline-none focus:ring-2 focus:ring-[#FFCB05] text-[#1A1A1A] text-base appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22 fill=%22none%22 stroke=%22%2300274C%22 stroke-width=%222%22><path d=%22M1 1l5 5 5-5%22/></svg>')] bg-no-repeat bg-[right_0.75rem_center] pr-9"
@@ -104,6 +105,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
           <div>
             <label className="block text-sm font-medium text-[#00274C] mb-2">Kids</label>
             <select
+              aria-label="Number of kids"
               value={kids}
               onChange={(e) => setKids(parseInt(e.target.value, 10))}
               className="w-full h-12 border border-[#D4D4D4] rounded-lg px-3 bg-white focus:outline-none focus:ring-2 focus:ring-[#FFCB05] text-base appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22 fill=%22none%22 stroke=%22%2300274C%22 stroke-width=%222%22><path d=%22M1 1l5 5 5-5%22/></svg>')] bg-no-repeat bg-[right_0.75rem_center] pr-9"
@@ -130,7 +132,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
 
         <button
           onClick={() => setShowRefine((v) => !v)}
-          className="mt-4 text-sm text-[#0B3E7E] hover:underline block"
+          className="mt-4 text-sm text-[#0B3E7E] underline decoration-[#0B3E7E]/40 underline-offset-2 hover:decoration-[#0B3E7E] block"
         >
           {showRefine ? "− Hide" : "+ Add"} home value for a sharper estimate (optional)
         </button>
@@ -454,7 +456,7 @@ function IntangibleCard({ icon, title, body, source, sourceUrl }: { icon: React.
           <div className="mt-2 text-[11px] text-[#5C5C5C]">
             Source:{" "}
             {sourceUrl ? (
-              <a href={sourceUrl} target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] hover:underline">{source}</a>
+              <a href={sourceUrl} target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] underline decoration-[#0B3E7E]/40 underline-offset-2 hover:decoration-[#0B3E7E]">{source}</a>
             ) : (
               source
             )}

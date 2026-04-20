@@ -70,13 +70,13 @@ export default async function Home() {
         <div className="max-w-4xl mx-auto px-5 py-8 text-xs text-[#5C5C5C] space-y-3">
           <div>
             <strong className="text-[#00274C]">Methodology for {CURRENT.year}:</strong> U.S. federal tax brackets from the{" "}
-            <a href={CURRENT.usFederal.source} target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] hover:underline">Internal Revenue Service</a>. State income tax and property tax averages from the Tax Foundation ({CURRENT.year} State Tax Competitiveness Index). Employer-sponsored health insurance premiums from{" "}
-            <a href="https://kff.org/report-section/ehbs-2025-summary-of-findings/" target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] hover:underline">KFF&apos;s Employer Health Benefits Survey</a>. Israeli income tax and Bituach Leumi rates from the{" "}
-            <a href={CURRENT.israel.source} target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] hover:underline">Israel Tax Authority</a>. Sal Klita computed from{" "}
-            <a href={CURRENT.salKlita.source} target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] hover:underline">Misrad Haklita</a> (Israeli Ministry of Aliyah &amp; Integration) published rates. USD→ILS from{" "}
-            <a href="https://stooq.com/q/?s=usdils" target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] hover:underline">Stooq</a>, refreshed hourly. Jewish day school tuition averaged across Modern Orthodox, Conservative, and community schools (annual Prizmah / Avi Chai tuition surveys). Happiness rankings from the{" "}
-            <a href="https://worldhappiness.report/" target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] hover:underline">World Happiness Report {CURRENT.year}</a>. Homicide rates from{" "}
-            <a href="https://dataunodc.un.org/dp-intentional-homicide-victims" target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] hover:underline">UNODC</a> and FBI UCR data.
+            <a href={CURRENT.usFederal.source} target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] underline decoration-[#0B3E7E]/40 underline-offset-2 hover:decoration-[#0B3E7E]">Internal Revenue Service</a>. State income tax and property tax averages from the Tax Foundation ({CURRENT.year} State Tax Competitiveness Index). Employer-sponsored health insurance premiums from{" "}
+            <a href="https://kff.org/report-section/ehbs-2025-summary-of-findings/" target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] underline decoration-[#0B3E7E]/40 underline-offset-2 hover:decoration-[#0B3E7E]">KFF&apos;s Employer Health Benefits Survey</a>. Israeli income tax and Bituach Leumi rates from the{" "}
+            <a href={CURRENT.israel.source} target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] underline decoration-[#0B3E7E]/40 underline-offset-2 hover:decoration-[#0B3E7E]">Israel Tax Authority</a>. Sal Klita computed from{" "}
+            <a href={CURRENT.salKlita.source} target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] underline decoration-[#0B3E7E]/40 underline-offset-2 hover:decoration-[#0B3E7E]">Misrad Haklita</a> (Israeli Ministry of Aliyah &amp; Integration) published rates. USD→ILS from{" "}
+            <a href="https://stooq.com/q/?s=usdils" target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] underline decoration-[#0B3E7E]/40 underline-offset-2 hover:decoration-[#0B3E7E]">Stooq</a>, refreshed hourly. Jewish day school tuition averaged across Modern Orthodox, Conservative, and community schools (annual Prizmah / Avi Chai tuition surveys). Happiness rankings from the{" "}
+            <a href="https://worldhappiness.report/" target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] underline decoration-[#0B3E7E]/40 underline-offset-2 hover:decoration-[#0B3E7E]">World Happiness Report {CURRENT.year}</a>. Homicide rates from{" "}
+            <a href="https://dataunodc.un.org/dp-intentional-homicide-victims" target="_blank" rel="nofollow noopener" className="text-[#0B3E7E] underline decoration-[#0B3E7E]/40 underline-offset-2 hover:decoration-[#0B3E7E]">UNODC</a> and FBI UCR data.
           </div>
           <div>
             <strong className="text-[#00274C]">Refresh schedule:</strong> Tax tables reviewed annually each January. Current snapshot: {CURRENT.year}, reviewed {CURRENT.lastReviewed}. Next scheduled refresh: {CURRENT.nextScheduledRefresh}.
@@ -86,16 +86,16 @@ export default async function Home() {
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-1 items-center">
             <span>Open source:{" "}
-              <a href="https://github.com/quietnotion/movetoisrael" target="_blank" rel="noopener" className="text-[#0B3E7E] hover:underline">github.com/quietnotion/movetoisrael</a>
+              <a href="https://github.com/quietnotion/movetoisrael" target="_blank" rel="noopener" className="text-[#0B3E7E] underline decoration-[#0B3E7E]/40 underline-offset-2 hover:decoration-[#0B3E7E]">github.com/quietnotion/movetoisrael</a>
             </span>
             <span>•</span>
             <span>Built by{" "}
-              <a href="https://quietnotion.com" target="_blank" rel="noopener" className="text-[#0B3E7E] hover:underline">Quiet Notion</a>
+              <a href="https://quietnotion.com" target="_blank" rel="noopener" className="text-[#0B3E7E] underline decoration-[#0B3E7E]/40 underline-offset-2 hover:decoration-[#0B3E7E]">Quiet Notion</a>
             </span>
             <span>•</span>
             <span>
               Say hi:{" "}
-              <a href="https://x.com/quietnotion" target="_blank" rel="noopener" className="text-[#0B3E7E] hover:underline">@quietnotion on X</a>
+              <a href="https://x.com/quietnotion" target="_blank" rel="noopener" className="text-[#0B3E7E] underline decoration-[#0B3E7E]/40 underline-offset-2 hover:decoration-[#0B3E7E]">@quietnotion on X</a>
             </span>
           </div>
         </div>
