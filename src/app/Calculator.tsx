@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { STATE_OPTIONS, StateCode } from "@/lib/states";
 import { calculate } from "@/lib/calc";
 import { CURRENT } from "@/data/current";
@@ -40,6 +40,20 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
 
   const betterOff = result.annualDelta >= 0;
   const bigNumber = Math.abs(result.annualDelta);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const qs = new URLSearchParams({
+        state,
+        income: String(income),
+        kids: String(kids),
+        track: "1",
+      });
+      fetch(`/api/calculate?${qs.toString()}`).catch(() => {});
+    }, 5000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const visibleRows = result.rows.filter((r) => {
     if (r.onlyIfKids && kids === 0) return false;
     if (r.onlyIfDaySchool && !sendsToDaySchool) return false;

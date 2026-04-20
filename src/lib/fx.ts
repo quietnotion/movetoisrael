@@ -1,4 +1,5 @@
 import { CURRENT } from "@/data/current";
+import { logError } from "./alert";
 
 export async function getUsdIlsRate(): Promise<number> {
   const fallback = CURRENT.israel.ilsPerUsdFallback;
@@ -7,24 +8,24 @@ export async function getUsdIlsRate(): Promise<number> {
       next: { revalidate: 3600 },
     });
     if (!res.ok) {
-      console.error(`[fx] Stooq non-OK status: ${res.status}, using fallback ${fallback}`);
+      await logError("fx.stooq", `Non-OK HTTP status: ${res.status}`, { fallback });
       return fallback;
     }
     const text = await res.text();
     const lines = text.trim().split("\n");
     if (lines.length < 2) {
-      console.error(`[fx] Stooq response malformed (${lines.length} lines), using fallback ${fallback}`);
+      await logError("fx.stooq", "Malformed CSV response", { lines: lines.length, fallback });
       return fallback;
     }
     const fields = lines[1].split(",");
     const close = parseFloat(fields[6]);
     if (isNaN(close) || close < 2 || close > 6) {
-      console.error(`[fx] Stooq returned out-of-range value ${fields[6]}, using fallback ${fallback}`);
+      await logError("fx.stooq", "Out-of-range value", { raw: fields[6], fallback });
       return fallback;
     }
     return close;
   } catch (err) {
-    console.error(`[fx] Stooq fetch failed:`, err, `using fallback ${fallback}`);
+    await logError("fx.stooq", err, { fallback });
     return fallback;
   }
 }

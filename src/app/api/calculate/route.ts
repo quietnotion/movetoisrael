@@ -2,8 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { calculate, Inputs } from "@/lib/calc";
 import { getUsdIlsRate } from "@/lib/fx";
 import { StateCode, STATES } from "@/lib/states";
+import { incrementCalculation } from "@/lib/counter";
+import { logError } from "@/lib/alert";
 
 export async function GET(req: NextRequest) {
+  try {
+    return await handle(req);
+  } catch (err) {
+    await logError("api.calculate", err, { url: req.nextUrl.toString() });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+  }
+}
+
+async function handle(req: NextRequest) {
   const p = req.nextUrl.searchParams;
   const state = (p.get("state") || "NY") as StateCode;
   const income = parseInt(p.get("income") || "0", 10);
@@ -22,6 +33,10 @@ export async function GET(req: NextRequest) {
   const inputs: Inputs = { state, householdIncome: income, kids, homeValue, sendsToJewishDaySchool };
   const fxRate = await getUsdIlsRate();
   const result = calculate(inputs, fxRate);
+  const track = p.get("track");
+  if (track === "1") {
+    await incrementCalculation();
+  }
 
   return NextResponse.json({
     ...result,

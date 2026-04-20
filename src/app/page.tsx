@@ -1,9 +1,15 @@
 import Calculator from "./Calculator";
 import { getUsdIlsRate } from "@/lib/fx";
+import { getTotalCount } from "@/lib/counter";
 import { CURRENT } from "@/data/current";
 
+export const revalidate = 60;
+
 export default async function Home() {
-  const fxRate = await getUsdIlsRate();
+  const [fxRate, totalCount] = await Promise.all([
+    getUsdIlsRate(),
+    getTotalCount(),
+  ]);
 
   return (
     <main className="min-h-screen">
@@ -21,7 +27,7 @@ export default async function Home() {
             Plug in your state, your income, and your kids. Get a straight-dollars answer. Not a pitch, not a guilt trip, not a vibe.
           </p>
           <p className="mt-3 text-sm text-white/60">
-            A plain-English aliyah calculator built by Americans for Americans. USD→ILS rate live at {fxRate.toFixed(2)}.
+            A plain-English aliyah calculator built by Americans for Americans. USD→ILS rate live at {fxRate.toFixed(2)}.{totalCount > 0 ? ` ${totalCount.toLocaleString()} calculations run so far.` : ""}
           </p>
         </div>
       </header>
