@@ -1,0 +1,33 @@
+name: Data correction
+description: A number in the calculator looks wrong. Let us know with a source.
+title: "[Data] "
+labels: ["data"]
+body:
+  - type: input
+    id: line
+    attributes:
+      label: Which line or section?
+      placeholder: "e.g. U.S. federal tax at $250K married filing jointly"
+    validations:
+      required: true
+  - type: input
+    id: current
+    attributes:
+      label: What the calculator currently shows
+      placeholder: "e.g. $42,000"
+  - type: input
+    id: proposed
+    attributes:
+      label: What you believe it should be
+      placeholder: "e.g. $38,500"
+  - type: textarea
+    id: source
+    attributes:
+      label: Source (official if possible)
+      description: "Link or citation. IRS, gov.il, Bituach Leumi, Tax Foundation, KFF are typical."
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else worth noting?

@@ -74,6 +74,26 @@ export async function getMonthCount(d = new Date()): Promise<number> {
   }
 }
 
+const RATE_KEY_PREFIX = "mti:rate:track:";
+const RATE_WINDOW_SECS = 3600;
+const RATE_MAX_PER_WINDOW = 5;
+
+export async function tryConsumeTrackBudget(ip: string): Promise<boolean> {
+  const c = client();
+  if (!c) return true;
+  try {
+    const key = `${RATE_KEY_PREFIX}${ip}`;
+    const count = await c.incr(key);
+    if (count === 1) {
+      await c.expire(key, RATE_WINDOW_SECS);
+    }
+    return count <= RATE_MAX_PER_WINDOW;
+  } catch (err) {
+    if (!isBenignFrameworkError(err)) await logError("counter.rate", err);
+    return true;
+  }
+}
+
 export async function getAllMonthlyCounts(): Promise<Record<string, number>> {
   const c = client();
   if (!c) return {};

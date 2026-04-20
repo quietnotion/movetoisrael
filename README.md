@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# movetoisrael.fyi
 
-## Getting Started
+A free, open-source calculator that tells American families, in straight dollars, what moving to Israel would do to their income.
 
-First, run the development server:
+**Live:** [movetoisrael.fyi](https://movetoisrael.fyi)
+
+## What it does
+
+Pick a U.S. state, plug in household income and number of kids, and the calculator returns an annual take-home delta. Under the hood it compares:
+
+- Federal + state income tax vs. Israeli income tax with the 10-year oleh benefit phased in
+- FICA vs. Bituach Leumi
+- Private Jewish day school tuition vs. free public Jewish education
+- Property tax vs. arnona
+- Employer-sponsored health insurance premiums vs. universal Kupat Holim coverage
+- Child-allowance credits (Kitzvat Yeladim) in Israel
+- Sal Klita arrival cash from Misrad Haklita
+
+All sources are linked in the page itself. If you think a number is wrong, open an issue — that's the point of it being open source.
+
+## Stack
+
+Next.js 16 App Router, React 19, TypeScript, Tailwind v4. Hosted on Vercel. Upstash Redis backs the public usage counter. Stooq supplies the USD/ILS rate with a fallback.
+
+Full architecture, data model, alert pipeline, and annual-refresh process are documented in [PROJECT.md](PROJECT.md).
+
+## Run it locally
 
 ```bash
+git clone https://github.com/quietnotion/movetoisrael
+cd movetoisrael
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The counter and Slack-alerting features require `KV_REST_API_*` and `SLACK_ADMIN_TOKEN` env vars, but the calculator runs fine without them.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Evergreen by design
 
-## Learn More
+The calculator is built to be easy to update each tax year. All year-specific numbers live in a single frozen snapshot at `src/data/years/YYYY.ts`. A GitHub Action opens a refresh issue every January 10th so the numbers don't go stale. See [PROJECT.md](PROJECT.md#annual-refresh) for the full process.
 
-To learn more about Next.js, take a look at the following resources:
+## Contributing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+PRs welcome. Especially helpful:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Corrections to tax data or sourcing (cite the official source in the PR)
+- Accuracy improvements on the Israeli side (oleh benefit edge cases, city-tier arnona)
+- Accessibility fixes
+- Translations of the intangibles copy
 
-## Deploy on Vercel
+Please open an issue first for anything larger than a typo fix.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[MIT](LICENSE). Built by [Quiet Notion](https://quietnotion.com).
