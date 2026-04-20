@@ -165,7 +165,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
             Sal Klita absorption basket, <span className="tabular-nums">₪{result.arrivalBonus.salKlitaNis.toLocaleString()}</span> paid across your first 6 months.
           </div>
           <div className="mt-4 text-xs sm:text-sm leading-snug">
-            Computed from <strong>Misrad Haklita</strong> (Israeli Ministry of Aliyah &amp; Integration) published rates: {CURRENT.salKlita.coupleNis.toLocaleString()} NIS baseline for a married couple, plus child supplements by age bracket. Converted at today&apos;s USD/ILS of {fxRate.toFixed(3)}.{" "}
+            Computed from <strong>Misrad Haklita</strong> (Israeli Ministry of Aliyah &amp; Integration) published rates: {CURRENT.salKlita.coupleNis.toLocaleString()} NIS baseline for a married couple, plus child supplements by age bracket. Converted at today&apos;s USD/ILS of {fxRate.toFixed(2)}.{" "}
             <a href={result.arrivalBonus.calculatorUrl} target="_blank" rel="nofollow noopener" className="underline">Official calculator</a>.
           </div>
           <div className="mt-auto pt-5 border-t border-[#00274C]/20 text-[11px] sm:text-xs text-[#00274C]/80 leading-snug">
@@ -350,14 +350,14 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
           <IntangibleCard
             icon={<IconShield />}
             title="Safer in daily life"
-            body="U.S. homicide rate runs roughly 3–4× Israel's. Despite headlines, violent crime in everyday Israeli life is meaningfully lower than in most of the U.S."
+            body="The U.S. homicide rate is roughly 2× Israel's. Despite headlines, violent crime in everyday Israeli life runs meaningfully lower than in most of the U.S."
             source="UNODC + FBI UCR"
             sourceUrl="https://dataunodc.un.org/dp-intentional-homicide-victims"
           />
           <IntangibleCard
             icon={<IconPeople />}
             title="Independent kids"
-            body="Israeli kids walk to school, ride buses alone, and roam playgrounds without a parent shadowing them. The 'free-range' parenting that U.S. thinkpieces romanticize is just how childhood works here."
+            body="Israeli kids walk to school, ride buses alone, and roam playgrounds without a parent shadowing them. The 'free-range' parenting that U.S. thinkpieces romanticize is just how childhood works in Israel."
           />
           <IntangibleCard
             icon={<IconChat />}
@@ -367,12 +367,12 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
           <IntangibleCard
             icon={<IconHome />}
             title="Being Jewish stops being a project"
-            body="Your calendar, your kids' school, your neighbors, your mayor: all Jewish. You're not explaining Hanukkah to coworkers, scheduling around holidays that aren't on the office calendar, or paying $28K/year so your kids know what Shabbat is. It's the water you swim in."
+            body="In Israel you're not explaining Hanukkah to coworkers, scheduling around holidays that aren't on the office calendar, or paying $28K/year so your kids know what Shabbat is. Jewish life is the shared rhythm of the country, not a side project you run in the margins."
           />
           <IntangibleCard
             icon={<IconBus />}
-            title="Jewish community is the default"
-            body="The social architecture that American Jewish families build deliberately (day school, shul, camp, trips to Israel) is just the environment here. Your kids' classmates, your neighbors, your kids' eventual dating pool are Jewish without you planning for it."
+            title="Jewish community is built in"
+            body="In the U.S., Jewish families build community deliberately: day school, shul, camp, trips to Israel. In Israel that community is already around you. Your kids' classmates, your neighbors, your kids' eventual dating pool are largely Jewish without you planning for it."
           />
           <IntangibleCard
             icon={<IconGift />}
@@ -381,9 +381,9 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
           />
           <IntangibleCard
             icon={<IconHeart />}
-            title="Having a baby: free, plus they pay you"
-            body="In the U.S., even with great employer insurance, a typical birth runs about $3,000 out of pocket after copays and deductibles. Uninsured, it's $13K to $40K. In Israel the hospital bill is zero, and Bituach Leumi sends a one-time birth grant of about 1,800 NIS (~$600) for your first kid, plus paid maternity leave at full salary for 15 weeks."
-            source="KFF Peterson Health System Tracker"
+            title="Planning a family"
+            body="In the U.S., even with strong employer insurance, a typical birth runs about $3,000 out of pocket after copays and deductibles. Uninsured, it's $13,000 to $40,000. In Israel, the hospital bill is zero, and employees who qualify receive 15 weeks of paid maternity leave funded by Bituach Leumi at their full prior salary (capped). Bituach Leumi also sends a one-time birth grant: about 2,103 NIS for the first child, 946 NIS for the second, 631 NIS each for subsequent children."
+            source="KFF Peterson Health System Tracker + Bituach Leumi"
             sourceUrl="https://www.healthsystemtracker.org/brief/health-costs-associated-with-pregnancy-childbirth-and-postpartum-care/"
           />
         </div>

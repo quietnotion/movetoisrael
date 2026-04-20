@@ -216,7 +216,7 @@ export function calculate(inputs: Inputs, fxRate?: number): CalcResult {
 
   const notes: string[] = [
     `U.S. federal and Israel ${CURRENT.year} tax year. Last reviewed ${CURRENT.lastReviewed}.`,
-    `Live USD to ILS conversion at ${ilsPerUsd.toFixed(3)}, sourced from Stooq and cached 1 hour.`,
+    `Live USD to ILS conversion at ${ilsPerUsd.toFixed(2)}, sourced from Stooq and cached 1 hour.`,
     `Assumes a married-filing-jointly U.S. household. Single and dual-earner numbers vary but land in a similar neighborhood.`,
     `Israel income tax column reflects the ${CURRENT.israel.olehDiscountYearsFullBenefit}-year deep-discount phase of the oleh benefit. The ${CURRENT.israel.olehDiscountYearsTotal}-year total ramp brings it to the full rate over time.`,
   ];

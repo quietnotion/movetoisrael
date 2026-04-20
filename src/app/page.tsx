@@ -21,7 +21,7 @@ export default async function Home() {
             Plug in your state, your income, and your kids. Get a straight-dollars answer. Not a pitch, not a guilt trip, not a vibe.
           </p>
           <p className="mt-3 text-sm text-white/60">
-            A plain-English aliyah calculator built by Americans for Americans. USD→ILS rate live at {fxRate.toFixed(3)}.
+            A plain-English aliyah calculator built by Americans for Americans. USD→ILS rate live at {fxRate.toFixed(2)}.
           </p>
         </div>
       </header>
