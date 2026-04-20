@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Merriweather } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const merriweather = Merriweather({
@@ -73,6 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="antialiased bg-[#FAFAFA] text-[#1A1A1A] font-[family-name:var(--font-inter)]">
         {children}
       </body>
+      {GA_ID && <GoogleAnalytics gaId={GA_ID} />}
     </html>
   );
 }
