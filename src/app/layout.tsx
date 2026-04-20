@@ -24,18 +24,22 @@ export const metadata: Metadata = {
     "cost of living Israel",
   ],
   authors: [{ name: "Quiet Notion" }],
+  metadataBase: new URL("https://movetoisrael.fyi"),
   openGraph: {
     title: "Moving to Israel: The Math",
     description:
       "Plug in your state, income, and kids. See what your actual numbers would look like in Israel. 2026 tax year.",
     type: "website",
     url: "https://movetoisrael.fyi",
+    siteName: "movetoisrael.fyi",
   },
   twitter: {
     card: "summary_large_image",
     title: "Moving to Israel: The Math",
     description:
       "Plug in your state, income, and kids. See what your actual numbers would look like in Israel.",
+    site: "@quietnotion",
+    creator: "@quietnotion",
   },
   robots: {
     index: true,
