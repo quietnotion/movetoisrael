@@ -1,0 +1,76 @@
+name: Notify Slack on tax-year data refresh
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/data/current.ts"
+      - "src/data/years/**"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract CURRENT_TAX_YEAR and lastReviewed
+        id: data
+        run: |
+          YEAR=$(grep -oE 'CURRENT_TAX_YEAR = [0-9]+' src/data/current.ts | grep -oE '[0-9]+' | head -1)
+          REVIEWED=$(grep -oE 'lastReviewed: "[0-9-]+"' src/data/years/${YEAR}.ts 2>/dev/null | grep -oE '[0-9-]+' | head -1 || echo "unknown")
+          NEXT=$(grep -oE 'nextScheduledRefresh: "[0-9-]+"' src/data/years/${YEAR}.ts 2>/dev/null | grep -oE '[0-9-]+' | head -1 || echo "unknown")
+          echo "year=$YEAR" >> "$GITHUB_OUTPUT"
+          echo "reviewed=$REVIEWED" >> "$GITHUB_OUTPUT"
+          echo "next=$NEXT" >> "$GITHUB_OUTPUT"
+
+      - name: Get changed files and commit info
+        id: changes
+        run: |
+          FILES=$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" -- 'src/data/' | head -10 | paste -sd '\n' -)
+          SUBJECT=$(git log -1 --pretty=%s "$GITHUB_SHA")
+          SHORT_SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
+          {
+            echo "files<<EOF"
+            echo "$FILES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "subject=$SUBJECT" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Ping Slack
+        if: env.SLACK_TOKEN != ''
+        env:
+          SLACK_TOKEN: ${{ secrets.SLACK_ADMIN_TOKEN }}
+          YEAR: ${{ steps.data.outputs.year }}
+          REVIEWED: ${{ steps.data.outputs.reviewed }}
+          NEXT: ${{ steps.data.outputs.next }}
+          FILES: ${{ steps.changes.outputs.files }}
+          SUBJECT: ${{ steps.changes.outputs.subject }}
+          SHORT_SHA: ${{ steps.changes.outputs.sha }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          text = f":floppy_disk: *movetoisrael.fyi tax-year data updated*"
+          blocks = [
+            {"type": "header", "text": {"type": "plain_text", "text": f"Data refresh live: {os.environ['YEAR']} tax year"}},
+            {"type": "section", "fields": [
+              {"type": "mrkdwn", "text": f"*Current tax year:*\n{os.environ['YEAR']}"},
+              {"type": "mrkdwn", "text": f"*Last reviewed:*\n{os.environ['REVIEWED']}"},
+              {"type": "mrkdwn", "text": f"*Next scheduled refresh:*\n{os.environ['NEXT']}"},
+              {"type": "mrkdwn", "text": f"*Commit:*\n`{os.environ['SHORT_SHA']}`"},
+            ]},
+            {"type": "section", "text": {"type": "mrkdwn", "text": f"*Message:* {os.environ['SUBJECT']}"}},
+            {"type": "section", "text": {"type": "mrkdwn", "text": f"*Files changed:*\n```{os.environ['FILES']}```"}},
+            {"type": "context", "elements": [{"type": "mrkdwn", "text": "Vercel is auto-deploying now. Hero tax-year badge on the live site will flip within ~60 seconds."}]},
+          ]
+          payload = {"channel": "C0ATWQCKUDT", "text": text, "blocks": blocks}
+          req = urllib.request.Request(
+            "https://slack.com/api/chat.postMessage",
+            data=json.dumps(payload).encode(),
+            headers={
+              "Authorization": f"Bearer {os.environ['SLACK_TOKEN']}",
+              "Content-Type": "application/json; charset=utf-8",
+            },
+          )
+          print(urllib.request.urlopen(req).read().decode()[:200])
+          PY
