@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { STATE_OPTIONS, StateCode } from "@/lib/states";
 import { calculate } from "@/lib/calc";
 import { CURRENT } from "@/data/current";
@@ -18,6 +18,60 @@ import {
 const fmt = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
+const INTANGIBLES = [
+  {
+    icon: <IconSparkles />,
+    title: "Happier, and it's measured",
+    body: "Israel ranks 8th on the 2026 World Happiness Index. The U.S. ranks 24th, its lowest ever. Among under-25s, Israel is 3rd. The U.S. is 60th.",
+    source: "World Happiness Report 2026",
+    sourceUrl: "https://worldhappiness.report/",
+  },
+  {
+    icon: <IconHeart />,
+    title: "Healthcare without the leash",
+    body: "Universal Kupat Holim coverage begins when you register on arrival. Quit your job, start a company, take a sabbatical. Your family stays covered. The closest U.S. equivalent for a family costs about $25K/year.",
+  },
+  {
+    icon: <IconShield />,
+    title: "Safer in daily life",
+    body: "The U.S. homicide rate is roughly 2× Israel's. Despite headlines, violent crime in everyday Israeli life runs meaningfully lower than in most of the U.S.",
+    source: "UNODC + FBI UCR",
+    sourceUrl: "https://dataunodc.un.org/dp-intentional-homicide-victims",
+  },
+  {
+    icon: <IconPeople />,
+    title: "Independent kids",
+    body: "Israeli kids walk to school, ride buses alone, and roam playgrounds without a parent shadowing them. The 'free-range' parenting that U.S. thinkpieces romanticize is just how childhood works in Israel.",
+  },
+  {
+    icon: <IconChat />,
+    title: "Bilingual kids, by osmosis",
+    body: "Kids raised in Israel grow up functionally bilingual in English and Hebrew with no intervention. A skill American parents pay thousands per year to simulate through after-school programs.",
+  },
+  {
+    icon: <IconHome />,
+    title: "Being Jewish stops being a project",
+    body: "In Israel you're not explaining Yom Kippur to coworkers, scheduling around holidays that aren't on the office calendar, or paying $28K/year so your kids grow up fluent in the tradition. Jewish life is the shared rhythm of the country, not a side project you run in the margins.",
+  },
+  {
+    icon: <IconBus />,
+    title: "Jewish community is built in",
+    body: "In the U.S., Jewish families build community deliberately: day school, shul, camp, trips to Israel. In Israel that community is already around you. Your kids' classmates, your neighbors, your kids' eventual dating pool are largely Jewish without you planning for it.",
+  },
+  {
+    icon: <IconGift />,
+    title: "Stuff that shows up free",
+    body: "Customs exemption on one household shipment, 500 hours of subsidized Hebrew ulpan, year-one arnona discount, reduced mortgage rates, and the Sal Klita cash in the box above.",
+  },
+  {
+    icon: <IconHeart />,
+    title: "Planning a family",
+    body: "In the U.S., even with strong employer insurance, a typical birth runs about $3,000 out of pocket after copays and deductibles. Uninsured, it's $13,000 to $40,000. In Israel, the hospital bill is zero, and employees who qualify receive 15 weeks of paid maternity leave funded by Bituach Leumi at their full prior salary (capped). Bituach Leumi also sends a one-time birth grant: about 2,103 NIS for the first child, 946 NIS for the second, 631 NIS each for subsequent children.",
+    source: "KFF Peterson Health System Tracker + Bituach Leumi",
+    sourceUrl: "https://www.healthsystemtracker.org/brief/health-costs-associated-with-pregnancy-childbirth-and-postpartum-care/",
+  },
+];
+
 export default function Calculator({ fxRate }: { fxRate: number }) {
   const [state, setState] = useState<StateCode>("NY");
   const [incomeK, setIncomeK] = useState<number>(250);
@@ -25,6 +79,9 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
   const [sendsToDaySchool, setSendsToDaySchool] = useState<boolean>(true);
   const [showRefine, setShowRefine] = useState(false);
   const [homeValueK, setHomeValueK] = useState<number>(0);
+  const [showAllIntangibles, setShowAllIntangibles] = useState(false);
+  const [showLineByLine, setShowLineByLine] = useState(false);
+  const isFirstRender = useRef(true);
 
   const income = incomeK * 1000;
   const homeValue = homeValueK * 1000;
@@ -42,7 +99,15 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
   const bigNumber = Math.abs(result.annualDelta);
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (typeof window !== "undefined" && sessionStorage.getItem("mti_tracked")) return;
     const t = setTimeout(() => {
+      try {
+        sessionStorage.setItem("mti_tracked", "1");
+      } catch {}
       const qs = new URLSearchParams({
         state,
         income: String(income),
@@ -52,10 +117,9 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
       fetch(`/api/calculate?${qs.toString()}`).catch((err) => {
         console.warn("[Calculator] track ping failed:", err);
       });
-    }, 5000);
+    }, 2000);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [state, income, kids, sendsToDaySchool, homeValue]);
   const visibleRows = result.rows.filter((r) => {
     if (r.onlyIfKids && kids === 0) return false;
     if (r.onlyIfDaySchool && !sendsToDaySchool) return false;
@@ -153,7 +217,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
           <div className="text-xs sm:text-sm font-bold text-[#FFCB05] tracking-widest uppercase">
             Every year, for life
           </div>
-          <div className="my-5 sm:my-6 font-[family-name:var(--font-merriweather)] font-black leading-none text-[min(18vw,5.5rem)] md:text-[5.5rem] lg:text-[min(8vw,5.5rem)]">
+          <div className="my-4 sm:my-6 font-[family-name:var(--font-merriweather)] font-black leading-none tracking-tight tabular-nums text-[clamp(2.5rem,11vw,5.5rem)] md:text-[5rem] lg:text-[min(8vw,5.5rem)]">
             {betterOff ? "+" : "−"}{fmt(bigNumber)}
           </div>
           <div className="text-base sm:text-lg text-[#FFCB05]">
@@ -176,7 +240,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
           <div className="text-xs sm:text-sm font-bold tracking-widest uppercase">
             On arrival, from the government
           </div>
-          <div className="my-5 sm:my-6 font-[family-name:var(--font-merriweather)] font-black leading-none text-[min(16vw,4.5rem)] md:text-[4.5rem] lg:text-[min(7vw,4.5rem)]">
+          <div className="my-4 sm:my-6 font-[family-name:var(--font-merriweather)] font-black leading-none tracking-tight tabular-nums text-[clamp(2.25rem,10vw,4.5rem)] md:text-[4rem] lg:text-[min(7vw,4.5rem)]">
             {fmt(result.arrivalBonus.salKlitaUsd)}
           </div>
           <div className="text-sm sm:text-base font-medium">
@@ -271,8 +335,22 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
           </table>
         </div>
 
-        {/* Mobile card layout */}
-        <div className="md:hidden space-y-3">
+        {/* Mobile: collapsed by default */}
+        <div className="md:hidden">
+          {!showLineByLine && (
+            <button
+              onClick={() => setShowLineByLine(true)}
+              className="w-full bg-white border border-[#E5E5E5] rounded-xl p-4 text-left flex items-center justify-between"
+            >
+              <div>
+                <div className="font-semibold text-[#00274C]">See the full math</div>
+                <div className="text-xs text-[#5C5C5C] mt-0.5">Every row that feeds the numbers above</div>
+              </div>
+              <span className="text-[#00274C] text-2xl leading-none">+</span>
+            </button>
+          )}
+        </div>
+        <div className={`md:hidden space-y-3 ${showLineByLine ? "" : "hidden"}`}>
           {visibleRows.map((r, i) => {
             const usCheaper = r.delta < 0;
             const ilCheaper = r.delta > 0;
@@ -353,58 +431,21 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
         </div>
 
         <div className="mt-5 grid md:grid-cols-2 gap-4">
-          <IntangibleCard
-            icon={<IconSparkles />}
-            title="Happier, and it's measured"
-            body="Israel ranks 8th on the 2026 World Happiness Index. The U.S. ranks 24th, its lowest ever. Among under-25s, Israel is 3rd. The U.S. is 60th."
-            source="World Happiness Report 2026"
-            sourceUrl="https://worldhappiness.report/"
-          />
-          <IntangibleCard
-            icon={<IconHeart />}
-            title="Healthcare without the leash"
-            body="Universal Kupat Holim coverage begins when you register on arrival. Quit your job, start a company, take a sabbatical. Your family stays covered. The closest U.S. equivalent for a family costs about $25K/year."
-          />
-          <IntangibleCard
-            icon={<IconShield />}
-            title="Safer in daily life"
-            body="The U.S. homicide rate is roughly 2× Israel's. Despite headlines, violent crime in everyday Israeli life runs meaningfully lower than in most of the U.S."
-            source="UNODC + FBI UCR"
-            sourceUrl="https://dataunodc.un.org/dp-intentional-homicide-victims"
-          />
-          <IntangibleCard
-            icon={<IconPeople />}
-            title="Independent kids"
-            body="Israeli kids walk to school, ride buses alone, and roam playgrounds without a parent shadowing them. The 'free-range' parenting that U.S. thinkpieces romanticize is just how childhood works in Israel."
-          />
-          <IntangibleCard
-            icon={<IconChat />}
-            title="Bilingual kids, by osmosis"
-            body="Kids raised in Israel grow up functionally bilingual in English and Hebrew with no intervention. A skill American parents pay thousands per year to simulate through after-school programs."
-          />
-          <IntangibleCard
-            icon={<IconHome />}
-            title="Being Jewish stops being a project"
-            body="In Israel you're not explaining Yom Kippur to coworkers, scheduling around holidays that aren't on the office calendar, or paying $28K/year so your kids grow up fluent in the tradition. Jewish life is the shared rhythm of the country, not a side project you run in the margins."
-          />
-          <IntangibleCard
-            icon={<IconBus />}
-            title="Jewish community is built in"
-            body="In the U.S., Jewish families build community deliberately: day school, shul, camp, trips to Israel. In Israel that community is already around you. Your kids' classmates, your neighbors, your kids' eventual dating pool are largely Jewish without you planning for it."
-          />
-          <IntangibleCard
-            icon={<IconGift />}
-            title="Stuff that shows up free"
-            body="Customs exemption on one household shipment, 500 hours of subsidized Hebrew ulpan, year-one arnona discount, reduced mortgage rates, and the Sal Klita cash in the box above."
-          />
-          <IntangibleCard
-            icon={<IconHeart />}
-            title="Planning a family"
-            body="In the U.S., even with strong employer insurance, a typical birth runs about $3,000 out of pocket after copays and deductibles. Uninsured, it's $13,000 to $40,000. In Israel, the hospital bill is zero, and employees who qualify receive 15 weeks of paid maternity leave funded by Bituach Leumi at their full prior salary (capped). Bituach Leumi also sends a one-time birth grant: about 2,103 NIS for the first child, 946 NIS for the second, 631 NIS each for subsequent children."
-            source="KFF Peterson Health System Tracker + Bituach Leumi"
-            sourceUrl="https://www.healthsystemtracker.org/brief/health-costs-associated-with-pregnancy-childbirth-and-postpartum-care/"
-          />
+          {INTANGIBLES.map((item, i) => (
+            <div
+              key={i}
+              className={i >= 4 && !showAllIntangibles ? "hidden md:block" : ""}
+            >
+              <IntangibleCard {...item} />
+            </div>
+          ))}
         </div>
+        <button
+          onClick={() => setShowAllIntangibles((v) => !v)}
+          className="md:hidden mt-4 w-full text-sm font-semibold text-[#00274C] underline decoration-[#FFCB05] decoration-2 underline-offset-4 py-2"
+        >
+          {showAllIntangibles ? "Show less" : `Show all ${INTANGIBLES.length} reasons →`}
+        </button>
       </div>
 
       <div className="mt-10 text-xs sm:text-sm text-[#5C5C5C] space-y-2">
