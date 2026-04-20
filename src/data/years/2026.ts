@@ -83,6 +83,28 @@ export const YEAR_2026 = {
     ],
   },
 
+  kitzvatYeladim: {
+    // Bituach Leumi child allowance, paid monthly to every Israeli resident
+    // parent regardless of income. 2026 rates from btl.gov.il.
+    monthlyNisByChildOrdinal: {
+      first: 173,
+      second: 219,
+      third: 219,
+      fourth: 219,
+      fifthPlus: 173,
+    },
+    source: "https://www.btl.gov.il/English%20Homepage/Benefits/Children/Pages/Rates%20of%20child%20allowance.aspx",
+  },
+
+  lowIncomeSupplement: {
+    // Ma'anak Avoda (Work Grant / negative income tax) and Hashlamat Hachnasa
+    // (income supplement) kick in for low earners. Not modeled directly
+    // because they're narrow edge cases for our audience; we surface a note
+    // when household income falls below this USD threshold.
+    thresholdUsd: 50000,
+    source: "https://www.btl.gov.il/English%20Homepage/Benefits/",
+  },
+
   costs: {
     jewishDaySchoolPerKidUsAvg: 28000,
     healthInsuranceFamilyUsAvg: 24600,

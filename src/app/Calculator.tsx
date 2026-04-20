@@ -99,7 +99,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
               className="w-4 h-4 rounded border-[#D4D4D4] accent-[#FFCB05]"
             />
             <span className="text-[#1A1A1A]">
-              <strong className="text-[#00274C]">We send our kids to Jewish day school.</strong>
+              <strong className="text-[#00274C]">We send our kids to Jewish day school (or we want to).</strong>
               <span className="text-[#5C5C5C]"> Adds tuition to the U.S. column. Uncheck if kids are in public or charter school.</span>
             </span>
           </label>
@@ -194,6 +194,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
               {visibleRows.map((r, i) => {
                 const usCheaper = r.delta < 0;
                 const ilCheaper = r.delta > 0;
+                const ilIsCredit = r.il < 0;
                 return (
                   <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-[#FAFAFA]"}>
                     <td className="px-5 py-4 align-top">
@@ -203,8 +204,8 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
                     <td className={`px-5 py-4 text-right align-top tabular-nums ${usCheaper ? "font-bold text-[#00274C]" : "text-[#5C5C5C]"}`}>
                       {r.us ? fmt(r.us) : "—"}
                     </td>
-                    <td className={`px-5 py-4 text-right align-top tabular-nums ${ilCheaper ? "font-bold text-[#00274C]" : "text-[#5C5C5C]"}`}>
-                      {r.il ? fmt(r.il) : "—"}
+                    <td className={`px-5 py-4 text-right align-top tabular-nums ${ilIsCredit ? "font-bold text-[#00274C]" : ilCheaper ? "font-bold text-[#00274C]" : "text-[#5C5C5C]"}`}>
+                      {ilIsCredit ? `+${fmt(Math.abs(r.il))}` : r.il ? fmt(r.il) : "—"}
                     </td>
                     <td className="px-5 py-4 text-right align-top tabular-nums">
                       {r.delta === 0 ? (
@@ -247,6 +248,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
           {visibleRows.map((r, i) => {
             const usCheaper = r.delta < 0;
             const ilCheaper = r.delta > 0;
+            const ilIsCredit = r.il < 0;
             return (
               <div key={i} className="bg-white border border-[#E5E5E5] rounded-xl p-4">
                 <div className="font-semibold text-[#1A1A1A]">{r.label}</div>
@@ -258,13 +260,17 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
                   </div>
                   <div>
                     <div className="text-[10px] uppercase tracking-wide text-[#5C5C5C]">Israel / yr</div>
-                    <div className={`tabular-nums text-base ${ilCheaper ? "font-bold text-[#00274C]" : "text-[#5C5C5C]"}`}>{r.il ? fmt(r.il) : "—"}</div>
+                    <div className={`tabular-nums text-base ${ilIsCredit || ilCheaper ? "font-bold text-[#00274C]" : "text-[#5C5C5C]"}`}>
+                      {ilIsCredit ? `+${fmt(Math.abs(r.il))}` : r.il ? fmt(r.il) : "—"}
+                    </div>
                   </div>
                 </div>
                 {r.delta !== 0 && (
                   <div className="mt-3">
                     {r.delta > 0 ? (
-                      <span className="inline-block bg-[#FFCB05]/20 text-[#00274C] font-bold px-2 py-1 rounded text-sm">You save {fmt(r.delta)}/yr in Israel</span>
+                      <span className="inline-block bg-[#FFCB05]/20 text-[#00274C] font-bold px-2 py-1 rounded text-sm">
+                        {ilIsCredit ? `You receive ${fmt(Math.abs(r.il))}/yr in Israel` : `You save ${fmt(r.delta)}/yr in Israel`}
+                      </span>
                     ) : (
                       <span className="text-sm text-[#5C5C5C]">You pay {fmt(Math.abs(r.delta))}/yr more in Israel</span>
                     )}

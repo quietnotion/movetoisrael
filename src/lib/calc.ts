@@ -112,6 +112,17 @@ function ilArnona(homeValueUsd: number): number {
   return Math.min(c.ilArnonaCapUsd, c.ilArnonaBaseUsd + homeValueUsd * c.ilArnonaPerHomeValue);
 }
 
+function kitzvatYeladimAnnualUsd(kids: number, ilsPerUsd: number): number {
+  if (kids === 0) return 0;
+  const rates = CURRENT.kitzvatYeladim.monthlyNisByChildOrdinal;
+  const schedule = [rates.first, rates.second, rates.third, rates.fourth];
+  let monthlyNis = 0;
+  for (let i = 0; i < kids; i++) {
+    monthlyNis += i < 4 ? schedule[i] : rates.fifthPlus;
+  }
+  return (monthlyNis * 12) / ilsPerUsd;
+}
+
 function arrivalBonus(kids: number, ilsPerUsd: number, kidsAges?: number[]) {
   const s = CURRENT.salKlita;
   let totalNis = s.coupleNis;
@@ -142,6 +153,7 @@ export function calculate(inputs: Inputs, fxRate?: number): CalcResult {
   const usProp = usPropertyTax(homeValue, state);
   const ilArn = homeValue > 0 ? ilArnona(homeValue) : 0;
   const usSchool = sendsToJewishDaySchool ? usJewishDaySchool(kids, kidsAges) : 0;
+  const ilChildAllowance = kitzvatYeladimAnnualUsd(kids, ilsPerUsd);
   const usCollege = kids * CURRENT.college.usAnnualSavingsPerKidUsd;
   const ilCollege = kids * CURRENT.college.ilAnnualSavingsPerKidUsd;
 
@@ -186,10 +198,18 @@ export function calculate(inputs: Inputs, fxRate?: number): CalcResult {
       onlyIfKids: true,
       note: `U.S. private 4-year college all-in is roughly $250K per kid in today's dollars. Funding it from birth requires about $${CURRENT.college.usAnnualSavingsPerKidUsd.toLocaleString()}/yr/kid. Israeli public university costs around $3K/yr in tuition over 3 or 4 years, so about $${CURRENT.college.ilAnnualSavingsPerKidUsd.toLocaleString()}/yr/kid covers it.`,
     },
+    {
+      label: "Child allowance (Kitzvat Yeladim), paid to you",
+      us: 0,
+      il: -ilChildAllowance,
+      delta: ilChildAllowance,
+      onlyIfKids: true,
+      note: "Monthly payment from Bituach Leumi to every Israeli resident parent, regardless of income. Paid to the mother's bank account. 2026 rates: 173 NIS/mo for the 1st child, 219 NIS/mo each for kids 2 through 4.",
+    },
   ];
 
   const usTotal = usIncomeTaxTotal + usHealth + usProp + usSchool + usCollege;
-  const ilTotal = ilIncomeTaxTotal + ilArn + ilCollege;
+  const ilTotal = ilIncomeTaxTotal + ilArn + ilCollege - ilChildAllowance;
   const usNet = householdIncome - usTotal;
   const ilNet = householdIncome - ilTotal;
   const annualDelta = ilNet - usNet;
@@ -200,6 +220,11 @@ export function calculate(inputs: Inputs, fxRate?: number): CalcResult {
     `Assumes a married-filing-jointly U.S. household. Single and dual-earner numbers vary but land in a similar neighborhood.`,
     `Israel income tax column reflects the ${CURRENT.israel.olehDiscountYearsFullBenefit}-year deep-discount phase of the oleh benefit. The ${CURRENT.israel.olehDiscountYearsTotal}-year total ramp brings it to the full rate over time.`,
   ];
+  if (householdIncome < CURRENT.lowIncomeSupplement.thresholdUsd) {
+    notes.push(
+      `At your household income level, Israel also offers an income supplement (Hashlamat Hachnasa) and a negative income tax / work grant (Ma'anak Avoda) for low earners. These aren't modeled here; if they apply to you, Israel's net number is better than what's shown.`
+    );
+  }
 
   const isWorseOff = annualDelta < 0;
   let forwardFraming: string | undefined;
