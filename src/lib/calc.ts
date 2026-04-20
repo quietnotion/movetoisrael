@@ -6,8 +6,8 @@ export type Inputs = {
   householdIncome: number;
   kids: number;
   homeValue?: number;
-  mortgageBalance?: number;
   kidsAges?: number[];
+  sendsToJewishDaySchool?: boolean;
 };
 
 export type Row = {
@@ -17,6 +17,7 @@ export type Row = {
   delta: number;
   note?: string;
   onlyIfKids?: boolean;
+  onlyIfDaySchool?: boolean;
 };
 
 export type CalcResult = {
@@ -131,7 +132,7 @@ function arrivalBonus(kids: number, ilsPerUsd: number, kidsAges?: number[]) {
 }
 
 export function calculate(inputs: Inputs, fxRate?: number): CalcResult {
-  const { state, householdIncome, kids, homeValue = 0, kidsAges } = inputs;
+  const { state, householdIncome, kids, homeValue = 0, kidsAges, sendsToJewishDaySchool = true } = inputs;
   const ilsPerUsd = fxRate ?? CURRENT.israel.ilsPerUsdFallback;
 
   const usIncomeTaxTotal = usFederalTax(householdIncome, kids) + usStateTax(householdIncome, state) + usFicaTax(householdIncome);
@@ -140,7 +141,7 @@ export function calculate(inputs: Inputs, fxRate?: number): CalcResult {
   const usHealth = usHealthCostOutOfPocket(state, kids, householdIncome);
   const usProp = usPropertyTax(homeValue, state);
   const ilArn = homeValue > 0 ? ilArnona(homeValue) : 0;
-  const usSchool = usJewishDaySchool(kids, kidsAges);
+  const usSchool = sendsToJewishDaySchool ? usJewishDaySchool(kids, kidsAges) : 0;
   const usCollege = kids * CURRENT.college.usAnnualSavingsPerKidUsd;
   const ilCollege = kids * CURRENT.college.ilAnnualSavingsPerKidUsd;
 
@@ -150,36 +151,40 @@ export function calculate(inputs: Inputs, fxRate?: number): CalcResult {
       us: usIncomeTaxTotal,
       il: ilIncomeTaxTotal,
       delta: usIncomeTaxTotal - ilIncomeTaxTotal,
-      note: `U.S. column combines federal + state + FICA. Israel column combines income tax (with ${Math.round((1 - CURRENT.israel.olehTaxDiscountMultiplier) * 100)}% oleh discount, first ${CURRENT.israel.olehDiscountYearsFullBenefit} years) + Bituach Leumi. As a U.S. citizen you still file with the IRS, but the Foreign Earned Income Exclusion and Foreign Tax Credit usually eliminate U.S. tax owed.`,
+      note: `U.S. column combines federal, state, and FICA. Israel column combines income tax (with the ${Math.round((1 - CURRENT.israel.olehTaxDiscountMultiplier) * 100)}% oleh discount for the first ${CURRENT.israel.olehDiscountYearsFullBenefit} years) and Bituach Leumi, which also funds Kupat Holim universal health coverage. As a U.S. citizen you still file with the IRS, but the Foreign Earned Income Exclusion and Foreign Tax Credit usually eliminate U.S. tax owed.`,
     },
     {
-      label: "Health insurance (out of your paycheck)",
+      label: "Health insurance out of your paycheck",
       us: usHealth,
       il: 0,
       delta: usHealth,
-      note: "Israel's universal healthcare (Kupat Holim) is funded by Bituach Leumi above. You pay nothing extra out of pocket for basic coverage.",
+      note: "In Israel, Kupat Holim coverage is already funded by Bituach Leumi in the row above. No separate premium comes out of your paycheck.",
     },
     {
-      label: "Property tax / Arnona",
+      label: "Property tax (U.S.) / Arnona (Israel)",
       us: usProp,
       il: ilArn,
       delta: usProp - ilArn,
+      note: homeValue > 0
+        ? "Israeli Arnona is charged per square meter, based on your city and property type. We estimate it here from your home value as a rough proxy; actual amount varies by municipality."
+        : "Enter your U.S. home value above to calculate property tax and Israeli Arnona. Arnona typically runs $1,500 to $2,000 per year for a standard family apartment.",
     },
     {
-      label: "Private Jewish day school",
+      label: "Private Jewish day school tuition",
       us: usSchool,
       il: 0,
       delta: usSchool,
       onlyIfKids: true,
-      note: "Israeli public schools are Jewish by default — calendar, Hebrew, Torah. No tuition required to raise Jewish kids.",
+      onlyIfDaySchool: true,
+      note: "Israeli public schools are Jewish by default, with calendar, Hebrew, and Torah built in. No tuition needed to raise Jewish kids.",
     },
     {
-      label: "College savings (needed per year)",
+      label: "College savings needed per year",
       us: usCollege,
       il: ilCollege,
       delta: usCollege - ilCollege,
       onlyIfKids: true,
-      note: `U.S. private 4-year college all-in is roughly $250K per kid in today's dollars; funding it from birth requires ~$${CURRENT.college.usAnnualSavingsPerKidUsd.toLocaleString()}/yr/kid. Israeli public university costs ~$3K/yr in tuition and takes 3–4 years; a modest ~$${CURRENT.college.ilAnnualSavingsPerKidUsd.toLocaleString()}/yr/kid covers it.`,
+      note: `U.S. private 4-year college all-in is roughly $250K per kid in today's dollars. Funding it from birth requires about $${CURRENT.college.usAnnualSavingsPerKidUsd.toLocaleString()}/yr/kid. Israeli public university costs around $3K/yr in tuition over 3 or 4 years, so about $${CURRENT.college.ilAnnualSavingsPerKidUsd.toLocaleString()}/yr/kid covers it.`,
     },
   ];
 
@@ -190,19 +195,19 @@ export function calculate(inputs: Inputs, fxRate?: number): CalcResult {
   const annualDelta = ilNet - usNet;
 
   const notes: string[] = [
-    `U.S. federal + Israel ${CURRENT.year} tax year, last reviewed ${CURRENT.lastReviewed}.`,
-    `Live USD→ILS conversion at ${ilsPerUsd.toFixed(3)} (Stooq, cached 1 hour).`,
-    `Married-filing-jointly U.S. household assumed. Single / dual-earner numbers vary but land in a similar neighborhood.`,
-    `Israel income tax column reflects the ${CURRENT.israel.olehDiscountYearsFullBenefit}-year deep-discount phase of the oleh benefit; the ${CURRENT.israel.olehDiscountYearsTotal}-year total ramp brings it to the full rate over time.`,
+    `U.S. federal and Israel ${CURRENT.year} tax year. Last reviewed ${CURRENT.lastReviewed}.`,
+    `Live USD to ILS conversion at ${ilsPerUsd.toFixed(3)}, sourced from Stooq and cached 1 hour.`,
+    `Assumes a married-filing-jointly U.S. household. Single and dual-earner numbers vary but land in a similar neighborhood.`,
+    `Israel income tax column reflects the ${CURRENT.israel.olehDiscountYearsFullBenefit}-year deep-discount phase of the oleh benefit. The ${CURRENT.israel.olehDiscountYearsTotal}-year total ramp brings it to the full rate over time.`,
   ];
 
   const isWorseOff = annualDelta < 0;
   let forwardFraming: string | undefined;
   if (isWorseOff) {
     if (kids === 0) {
-      forwardFraming = `With no kids and no homeownership, the straight tax math runs $${Math.abs(Math.round(annualDelta)).toLocaleString()} against you on paper — Israeli marginal rates are high. Add one child and the math flips hard: Jewish day school runs $${CURRENT.costs.jewishDaySchoolPerKidUsAvg.toLocaleString()}/yr/kid in the U.S. and college savings another $${CURRENT.college.usAnnualSavingsPerKidUsd.toLocaleString()}/yr/kid, both of which disappear in Israel. If you're thinking about family life, the math is working for you.`;
+      forwardFraming = `With no kids and no homeownership, the straight tax math runs $${Math.abs(Math.round(annualDelta)).toLocaleString()} against you on paper, because Israeli marginal rates are high. Add one child and the math flips hard. Jewish day school runs $${CURRENT.costs.jewishDaySchoolPerKidUsAvg.toLocaleString()}/yr/kid in the U.S., and college savings another $${CURRENT.college.usAnnualSavingsPerKidUsd.toLocaleString()}/yr/kid, both of which disappear in Israel. If you're thinking about family life, the math is working for you.`;
     } else {
-      forwardFraming = `Your U.S. tax profile is unusually favorable and the pure tax line is close to neutral. The case for moving lives in everything else — universal healthcare that isn't tied to your job, kids who grow up bilingual in a Jewish-majority society, and the cash Israel hands you on arrival.`;
+      forwardFraming = `Your U.S. tax profile is unusually favorable and the pure tax line is close to neutral. The case for moving lives in everything else. Universal healthcare that isn't tied to your job. Kids who grow up bilingual in a Jewish-majority society. The cash Israel hands you on arrival.`;
     }
   }
 

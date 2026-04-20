@@ -22,26 +22,29 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
   const [state, setState] = useState<StateCode>("NY");
   const [incomeK, setIncomeK] = useState<number>(250);
   const [kids, setKids] = useState<number>(2);
+  const [sendsToDaySchool, setSendsToDaySchool] = useState<boolean>(true);
   const [showRefine, setShowRefine] = useState(false);
   const [homeValueK, setHomeValueK] = useState<number>(0);
-  const [mortgageBalanceK, setMortgageBalanceK] = useState<number>(0);
 
   const income = incomeK * 1000;
   const homeValue = homeValueK * 1000;
-  const mortgageBalance = mortgageBalanceK * 1000;
 
   const result = useMemo(
     () =>
       calculate(
-        { state, householdIncome: income, kids, homeValue: homeValue || undefined, mortgageBalance: mortgageBalance || undefined },
+        { state, householdIncome: income, kids, homeValue: homeValue || undefined, sendsToJewishDaySchool: sendsToDaySchool },
         fxRate
       ),
-    [state, income, kids, homeValue, mortgageBalance, fxRate]
+    [state, income, kids, homeValue, sendsToDaySchool, fxRate]
   );
 
   const betterOff = result.annualDelta >= 0;
   const bigNumber = Math.abs(result.annualDelta);
-  const visibleRows = result.rows.filter((r) => !r.onlyIfKids || kids > 0);
+  const visibleRows = result.rows.filter((r) => {
+    if (r.onlyIfKids && kids === 0) return false;
+    if (r.onlyIfDaySchool && !sendsToDaySchool) return false;
+    return true;
+  });
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-5 py-6 sm:py-10">
@@ -87,17 +90,31 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
           </div>
         </div>
 
+        {kids > 0 && (
+          <label className="mt-4 flex items-center gap-2 text-sm cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={sendsToDaySchool}
+              onChange={(e) => setSendsToDaySchool(e.target.checked)}
+              className="w-4 h-4 rounded border-[#D4D4D4] accent-[#FFCB05]"
+            />
+            <span className="text-[#1A1A1A]">
+              <strong className="text-[#00274C]">We send our kids to Jewish day school.</strong>
+              <span className="text-[#5C5C5C]"> Adds tuition to the U.S. column. Uncheck if kids are in public or charter school.</span>
+            </span>
+          </label>
+        )}
+
         <button
           onClick={() => setShowRefine((v) => !v)}
-          className="mt-4 text-sm text-[#0B3E7E] hover:underline"
+          className="mt-4 text-sm text-[#0B3E7E] hover:underline block"
         >
           {showRefine ? "− Hide" : "+ Add"} home value for a sharper estimate (optional)
         </button>
 
         {showRefine && (
-          <div className="mt-4 grid md:grid-cols-2 gap-4 pt-4 border-t border-[#E5E5E5]">
+          <div className="mt-4 pt-4 border-t border-[#E5E5E5]">
             <LabeledMoneyK label="U.S. home value" value={homeValueK} onChange={setHomeValueK} placeholder="650" />
-            <LabeledMoneyK label="Mortgage balance" value={mortgageBalanceK} onChange={setMortgageBalanceK} placeholder="380" />
           </div>
         )}
       </div>
@@ -113,7 +130,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
             {betterOff ? "+" : "−"}{fmt(bigNumber)}
           </div>
           <div className="text-base sm:text-lg text-[#FFCB05]">
-            {betterOff ? "more" : "less"} in your pocket — living in Israel
+            {betterOff ? "more" : "less"} in your pocket, living in Israel
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3">
             <div className="bg-white/10 rounded-lg p-3 sm:p-4">
@@ -136,7 +153,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
             {fmt(result.arrivalBonus.salKlitaUsd)}
           </div>
           <div className="text-sm sm:text-base font-medium">
-            Sal Klita absorption basket — <span className="tabular-nums">₪{result.arrivalBonus.salKlitaNis.toLocaleString()}</span> paid across your first 6 months.
+            Sal Klita absorption basket, <span className="tabular-nums">₪{result.arrivalBonus.salKlitaNis.toLocaleString()}</span> paid across your first 6 months.
           </div>
           <div className="mt-4 text-xs sm:text-sm leading-snug">
             Computed from <strong>Misrad Haklita</strong> (Israeli Ministry of Aliyah &amp; Integration) published rates: {CURRENT.salKlita.coupleNis.toLocaleString()} NIS baseline for a married couple, plus child supplements by age bracket. Converted at today&apos;s USD/ILS of {fxRate.toFixed(3)}.
@@ -214,7 +231,7 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
                 </td>
               </tr>
               <tr className="bg-[#FFCB05]/20 text-[#00274C]">
-                <td className="px-5 py-3 text-sm italic">Net cash in your pocket (after everything above) — matches the big number at top</td>
+                <td className="px-5 py-3 text-sm italic">Net cash in your pocket, matching the big number at top</td>
                 <td className="px-5 py-3 text-right tabular-nums font-semibold">{fmt(result.usNet)}</td>
                 <td className="px-5 py-3 text-right tabular-nums font-semibold">{fmt(result.ilNet)}</td>
                 <td className="px-5 py-3 text-right tabular-nums font-black">
@@ -304,15 +321,15 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
         <div className="mt-5 grid md:grid-cols-2 gap-4">
           <IntangibleCard
             icon={<IconSparkles />}
-            title="Happier — and it's measured"
-            body="Israel ranks 8th on the 2026 World Happiness Index. The U.S. ranks 24th — its lowest ever. Among under-25s, Israel is 3rd; the U.S. is 60th."
+            title="Happier, and it's measured"
+            body="Israel ranks 8th on the 2026 World Happiness Index. The U.S. ranks 24th, its lowest ever. Among under-25s, Israel is 3rd. The U.S. is 60th."
             source="World Happiness Report 2026"
             sourceUrl="https://worldhappiness.report/"
           />
           <IntangibleCard
             icon={<IconHeart />}
             title="Healthcare without the leash"
-            body="Universal Kupat Holim coverage begins when you register on arrival. Quit your job, start a company, take a sabbatical — your family stays covered. The closest U.S. equivalent for a family costs ~$25K/year."
+            body="Universal Kupat Holim coverage begins when you register on arrival. Quit your job, start a company, take a sabbatical. Your family stays covered. The closest U.S. equivalent for a family costs about $25K/year."
           />
           <IntangibleCard
             icon={<IconShield />}
@@ -334,12 +351,12 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
           <IntangibleCard
             icon={<IconHome />}
             title="Being Jewish stops being a project"
-            body="Your calendar, your kids' school, your neighbors, your mayor — all Jewish. You're not explaining Hanukkah to coworkers, scheduling around holidays that aren't on the office calendar, or paying $28K/year so your kids know what Shabbat is. It's the water you swim in."
+            body="Your calendar, your kids' school, your neighbors, your mayor: all Jewish. You're not explaining Hanukkah to coworkers, scheduling around holidays that aren't on the office calendar, or paying $28K/year so your kids know what Shabbat is. It's the water you swim in."
           />
           <IntangibleCard
             icon={<IconBus />}
             title="Jewish community is the default"
-            body="The social architecture that American Jewish families build deliberately — day school, shul, camp, trips to Israel — is just the environment here. Your kids' classmates, your neighbors, your kids' eventual dating pool are Jewish without you planning for it."
+            body="The social architecture that American Jewish families build deliberately (day school, shul, camp, trips to Israel) is just the environment here. Your kids' classmates, your neighbors, your kids' eventual dating pool are Jewish without you planning for it."
           />
           <IntangibleCard
             icon={<IconGift />}

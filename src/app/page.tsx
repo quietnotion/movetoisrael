@@ -18,7 +18,7 @@ export default async function Home() {
             What would moving to Israel actually mean for your money?
           </h1>
           <p className="mt-4 text-lg md:text-xl text-white/80 max-w-2xl">
-            Plug in your state, your income, and your kids. Get a straight-dollars answer — not a pitch, not a guilt trip, not a vibe.
+            Plug in your state, your income, and your kids. Get a straight-dollars answer. Not a pitch, not a guilt trip, not a vibe.
           </p>
           <p className="mt-3 text-sm text-white/60">
             A plain-English aliyah calculator built by Americans for Americans. USD→ILS rate live at {fxRate.toFixed(3)}.
@@ -39,15 +39,15 @@ export default async function Home() {
           />
           <FAQ
             q="Do I still pay U.S. taxes after moving?"
-            a={`Yes. If you're a U.S. citizen you file a U.S. tax return every year regardless of where you live — same as if you moved to France, Japan, or anywhere else. But you typically don't end up owing U.S. tax: the Foreign Earned Income Exclusion lets you exclude roughly $${CURRENT.usFederal.feieLimit.toLocaleString()} of wages per person (so ~$${(CURRENT.usFederal.feieLimit * 2).toLocaleString()} for a married couple), and the Foreign Tax Credit takes care of most of the rest by crediting taxes you already paid to Israel. Example: a couple earning $250K with both earning roughly equal wages in Israel will usually owe $0 in U.S. federal tax after FEIE + FTC. A cross-border CPA can confirm your specific situation.`}
+            a={`Yes. If you're a U.S. citizen you file a U.S. tax return every year regardless of where you live. Same as if you moved to France, Japan, or anywhere else. But you typically don't end up owing U.S. tax: the Foreign Earned Income Exclusion lets you exclude roughly $${CURRENT.usFederal.feieLimit.toLocaleString()} of wages per person (so around $${(CURRENT.usFederal.feieLimit * 2).toLocaleString()} for a married couple), and the Foreign Tax Credit takes care of most of the rest by crediting taxes you already paid to Israel. For example, a couple earning $250K with both earning roughly equal wages in Israel will usually owe $0 in U.S. federal tax after FEIE and FTC. A cross-border CPA can confirm your specific situation.`}
           />
           <FAQ
             q="What about healthcare?"
-            a="Kupat Holim (Israel's public health system) covers you as soon as you register on arrival. You pick one of four funds (Clalit, Maccabi, Meuhedet, Leumit). Israel ranks ahead of the U.S. on most global health metrics — life expectancy, infant mortality, preventive care."
+            a="Kupat Holim (Israel's public health system) covers you as soon as you register on arrival. You pick one of four funds: Clalit, Maccabi, Meuhedet, or Leumit. Israel ranks ahead of the U.S. on most global health metrics, including life expectancy, infant mortality, and preventive care."
           />
           <FAQ
             q="Are Israeli public schools any good for my kids?"
-            a={`Depends on neighborhood, like anywhere. Public schools are Jewish by default — calendar, Hebrew, Torah. Religious families use 'mamlachti dati' (state religious) or haredi-track schools, all free. Jewish day school tuition — about $${CURRENT.costs.jewishDaySchoolPerKidUsAvg.toLocaleString()} per kid per year in the U.S. — simply isn't a line item in Israel.`}
+            a={`Depends on neighborhood, like anywhere. Public schools are Jewish by default, with calendar, Hebrew, and Torah built in. Religious families use 'mamlachti dati' (state religious) or haredi-track schools, all free. Jewish day school tuition, about $${CURRENT.costs.jewishDaySchoolPerKidUsAvg.toLocaleString()} per kid per year in the U.S., simply isn't a line item in Israel.`}
           />
           <FAQ
             q="How is this calculator kept up to date?"
@@ -55,7 +55,7 @@ export default async function Home() {
           />
           <FAQ
             q="Who built this?"
-            a="Quiet Notion LTD, a small software company based in Israel. We built it because existing tools didn't do the job — either they were one-variable calculators or marketing funnels for a consulting pitch. This is just here for information."
+            a="Quiet Notion LTD, a small software company based in Israel. We built it because existing tools didn't do the job. Either they were one-variable calculators or marketing funnels for a consulting pitch. This is just here for information."
           />
         </div>
       </section>
@@ -63,7 +63,7 @@ export default async function Home() {
       <footer className="bg-[#F5F5F5] border-t border-[#E5E5E5]">
         <div className="max-w-4xl mx-auto px-5 py-8 text-xs text-[#5C5C5C] space-y-3">
           <div>
-            <strong className="text-[#00274C]">Methodology — {CURRENT.year}:</strong> U.S. federal tax brackets from the{" "}
+            <strong className="text-[#00274C]">Methodology for {CURRENT.year}:</strong> U.S. federal tax brackets from the{" "}
             <a href={CURRENT.usFederal.source} target="_blank" rel="noopener" className="text-[#0B3E7E] hover:underline">Internal Revenue Service</a>. State income tax and property tax averages from the Tax Foundation ({CURRENT.year} State Tax Competitiveness Index). Employer-sponsored health insurance premiums from{" "}
             <a href="https://kff.org/report-section/ehbs-2025-summary-of-findings/" target="_blank" rel="noopener" className="text-[#0B3E7E] hover:underline">KFF&apos;s Employer Health Benefits Survey</a>. Israeli income tax and Bituach Leumi rates from the{" "}
             <a href={CURRENT.israel.source} target="_blank" rel="noopener" className="text-[#0B3E7E] hover:underline">Israel Tax Authority</a>. Sal Klita computed from{" "}
@@ -76,7 +76,7 @@ export default async function Home() {
             <strong className="text-[#00274C]">Refresh schedule:</strong> Tax tables reviewed annually each January. Current snapshot: {CURRENT.year}, reviewed {CURRENT.lastReviewed}. Next scheduled refresh: {CURRENT.nextScheduledRefresh}.
           </div>
           <div>
-            <strong className="text-[#00274C]">Disclaimer:</strong> Estimates only. Not tax advice. Individual situations vary — especially for self-employed, business owners, and high earners. Talk to a cross-border CPA before making financial decisions.
+            <strong className="text-[#00274C]">Disclaimer:</strong> Estimates only. Not tax advice. Individual situations vary, especially for self-employed, business owners, and high earners. Talk to a cross-border CPA before making financial decisions.
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-1 items-center">
             <span>Open source:{" "}

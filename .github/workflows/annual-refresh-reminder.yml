@@ -1,0 +1,87 @@
+name: Annual tax-year refresh reminder
+
+on:
+  schedule:
+    - cron: "0 9 10 1 *"
+    - cron: "0 9 15 3 *"
+  workflow_dispatch:
+
+jobs:
+  open-or-bump-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Compute target tax year
+        id: year
+        run: |
+          TARGET_YEAR=$(date +%Y)
+          echo "year=$TARGET_YEAR" >> "$GITHUB_OUTPUT"
+
+      - name: Find existing open refresh issue
+        id: find
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const year = '${{ steps.year.outputs.year }}';
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'annual-refresh',
+              per_page: 50,
+            });
+            const match = issues.find(i => i.title.includes(year));
+            return match ? match.number : 0;
+          result-encoding: string
+
+      - name: Open the refresh issue if missing
+        if: steps.find.outputs.result == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const year = '${{ steps.year.outputs.year }}';
+            const body = [
+              `Annual refresh of tax and cost data for the ${year} tax year.`,
+              ``,
+              `Follow the full checklist in [\`scripts/update-year.md\`](../blob/main/scripts/update-year.md).`,
+              ``,
+              `### Required primary-source updates (tax + government)`,
+              `- [ ] U.S. federal: IRS Rev Proc for ${year}`,
+              `- [ ] Israel income tax brackets: gov.il Israel Tax Authority`,
+              `- [ ] Bituach Leumi rates and caps`,
+              `- [ ] Sal Klita amounts: Misrad Haklita published rates`,
+              `- [ ] Oleh tax benefit schedule`,
+              ``,
+              `### Required inflation reviews (apply CPI if no new release)`,
+              `- [ ] Jewish day school tuition (Prizmah / Avi Chai)`,
+              `- [ ] College savings target (College Board)`,
+              `- [ ] Health insurance family premium (KFF)`,
+              `- [ ] U.S. state property tax effective rates (Tax Foundation)`,
+              `- [ ] Israeli arnona baseline`,
+              ``,
+              `When merged, flip \`CURRENT_TAX_YEAR\` in \`src/data/current.ts\` and update \`lastReviewed\` + \`nextScheduledRefresh\` in the new \`years/${year}.ts\`.`,
+            ].join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Annual tax-year refresh for ${year}`,
+              body,
+              labels: ['annual-refresh'],
+            });
+
+      - name: Add a bump comment on the March reminder
+        if: steps.find.outputs.result != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const number = parseInt('${{ steps.find.outputs.result }}', 10);
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: number,
+              body: 'Second reminder: this refresh issue is still open. The data on the live site is aging.',
+            });

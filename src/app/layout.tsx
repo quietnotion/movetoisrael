@@ -10,7 +10,7 @@ const merriweather = Merriweather({
 });
 
 export const metadata: Metadata = {
-  title: "Moving to Israel — The Math | 2026 Tax Year Calculator",
+  title: "Moving to Israel: The Math | 2026 Tax Year Calculator",
   description:
     "A straight-dollars calculator for Americans weighing a move to Israel. Compare take-home income, healthcare, property tax, and Jewish day school cost against your current U.S. state. Includes Sal Klita absorption benefits and oleh (aliyah) tax credits for 2026.",
   keywords: [
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Quiet Notion" }],
   openGraph: {
-    title: "Moving to Israel — The Math",
+    title: "Moving to Israel: The Math",
     description:
       "Plug in your state, income, and kids. See what your actual numbers would look like in Israel. 2026 tax year.",
     type: "website",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Moving to Israel — The Math",
+    title: "Moving to Israel: The Math",
     description:
       "Plug in your state, income, and kids. See what your actual numbers would look like in Israel.",
   },
@@ -54,7 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebApplication",
-              name: "Moving to Israel — The Math",
+              name: "Moving to Israel: The Math",
               alternateName: ["Aliyah Calculator", "Israel Cost of Living Calculator"],
               url: "https://movetoisrael.fyi",
               applicationCategory: "FinanceApplication",

@@ -9,7 +9,8 @@ export async function GET(req: NextRequest) {
   const income = parseInt(p.get("income") || "0", 10);
   const kids = parseInt(p.get("kids") || "0", 10);
   const homeValue = p.get("homeValue") ? parseInt(p.get("homeValue")!, 10) : undefined;
-  const mortgageBalance = p.get("mortgageBalance") ? parseInt(p.get("mortgageBalance")!, 10) : undefined;
+  const dayschoolParam = p.get("dayschool");
+  const sendsToJewishDaySchool = dayschoolParam === null ? undefined : dayschoolParam !== "0" && dayschoolParam !== "false";
 
   if (!STATES[state]) {
     return NextResponse.json({ error: "Invalid state code" }, { status: 400 });
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Income must be between 10,000 and 10,000,000" }, { status: 400 });
   }
 
-  const inputs: Inputs = { state, householdIncome: income, kids, homeValue, mortgageBalance };
+  const inputs: Inputs = { state, householdIncome: income, kids, homeValue, sendsToJewishDaySchool };
   const fxRate = await getUsdIlsRate();
   const result = calculate(inputs, fxRate);
 
