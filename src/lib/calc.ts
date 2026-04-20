@@ -31,6 +31,7 @@ export type CalcResult = {
   forwardFraming?: string;
   arrivalBonus: {
     salKlitaUsd: number;
+    salKlitaNis: number;
     calculatorUrl: string;
   };
   totals: { us: number; il: number; delta: number };
@@ -110,11 +111,21 @@ function ilArnona(homeValueUsd: number): number {
   return Math.min(c.ilArnonaCapUsd, c.ilArnonaBaseUsd + homeValueUsd * c.ilArnonaPerHomeValue);
 }
 
-function arrivalBonus(kids: number) {
+function arrivalBonus(kids: number, ilsPerUsd: number, kidsAges?: number[]) {
   const s = CURRENT.salKlita;
-  const salKlitaUsd = s.perCoupleUsd + s.perChildUsd * kids;
+  let totalNis = s.coupleNis;
+  if (kidsAges && kidsAges.length > 0) {
+    for (const age of kidsAges) {
+      if (age < 4) totalNis += s.perChildNisByAge.under4;
+      else if (age < 18) totalNis += s.perChildNisByAge.age4to17;
+      else totalNis += s.perChildNisByAge.age18to21;
+    }
+  } else {
+    totalNis += s.perChildNisByAge.age4to17 * kids;
+  }
   return {
-    salKlitaUsd: Math.round(salKlitaUsd),
+    salKlitaUsd: Math.round(totalNis / ilsPerUsd),
+    salKlitaNis: Math.round(totalNis),
     calculatorUrl: s.officialCalculatorUrl,
   };
 }
@@ -205,7 +216,7 @@ export function calculate(inputs: Inputs, fxRate?: number): CalcResult {
     lastReviewed: CURRENT.lastReviewed,
     isWorseOff,
     forwardFraming,
-    arrivalBonus: arrivalBonus(kids),
+    arrivalBonus: arrivalBonus(kids, ilsPerUsd, kidsAges),
     totals: {
       us: Math.round(usTotal),
       il: Math.round(ilTotal),

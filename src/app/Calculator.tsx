@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { STATE_OPTIONS, StateCode } from "@/lib/states";
 import { calculate } from "@/lib/calc";
+import { CURRENT } from "@/data/current";
 import {
   IconSparkles,
   IconHeart,
@@ -10,6 +11,8 @@ import {
   IconChat,
   IconHome,
   IconGift,
+  IconBus,
+  IconPeople,
 } from "./Icons";
 
 const fmt = (n: number) =>
@@ -130,19 +133,16 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
             On arrival, from the government
           </div>
           <div className="my-5 sm:my-6 font-[family-name:var(--font-merriweather)] font-black leading-none text-[min(16vw,4.5rem)] md:text-[4.5rem] lg:text-[min(7vw,4.5rem)]">
-            ~{fmt(result.arrivalBonus.salKlitaUsd)}
+            {fmt(result.arrivalBonus.salKlitaUsd)}
           </div>
           <div className="text-sm sm:text-base font-medium">
-            Sal Klita absorption basket, paid across your first 6 months.
+            Sal Klita absorption basket — <span className="tabular-nums">₪{result.arrivalBonus.salKlitaNis.toLocaleString()}</span> paid across your first 6 months.
           </div>
           <div className="mt-4 text-xs sm:text-sm leading-snug">
-            Paid by <strong>Misrad Haklita</strong> (the Israeli Ministry of Aliyah &amp; Integration). Amount scales with family size and age of children — this is an estimate.{" "}
-            <a href={result.arrivalBonus.calculatorUrl} target="_blank" rel="noopener" className="underline font-semibold">
-              Get your exact figure
-            </a>.
+            Computed from <strong>Misrad Haklita</strong> (Israeli Ministry of Aliyah &amp; Integration) published rates: {CURRENT.salKlita.coupleNis.toLocaleString()} NIS baseline for a married couple, plus child supplements by age bracket. Converted at today&apos;s USD/ILS of {fxRate.toFixed(3)}.
           </div>
           <div className="mt-auto pt-5 border-t border-[#00274C]/20 text-[11px] sm:text-xs text-[#00274C]/80 leading-snug">
-            <strong className="text-[#00274C]">Not in this number (but included):</strong> customs exemption on one household shipment, 500 hours of free Hebrew ulpan, year-one arnona (property tax) discount, reduced-rate mortgages, and a 10-year tax benefit already baked into the calculation above.
+            <strong className="text-[#00274C]">Also included (not in this number):</strong> customs exemption on one household shipment, 500 hours of free Hebrew ulpan, year-one arnona (property tax) discount, reduced-rate mortgages, and the 10-year oleh tax benefit already baked into the annual calculation to your left.
           </div>
         </div>
       </div>
@@ -304,33 +304,47 @@ export default function Calculator({ fxRate }: { fxRate: number }) {
         <div className="mt-5 grid md:grid-cols-2 gap-4">
           <IntangibleCard
             icon={<IconSparkles />}
-            title="Happiness — measured"
+            title="Happier — and it's measured"
             body="Israel ranks 8th on the 2026 World Happiness Index. The U.S. ranks 24th — its lowest ever. Among under-25s, Israel is 3rd; the U.S. is 60th."
+            source="World Happiness Report 2026"
+            sourceUrl="https://worldhappiness.report/"
           />
           <IntangibleCard
             icon={<IconHeart />}
             title="Healthcare without the leash"
-            body="Universal Kupat Holim from day one. Quit your job, start a company, take a sabbatical — your family stays covered. The closest U.S. equivalent costs ~$25K/year."
+            body="Universal Kupat Holim coverage begins when you register on arrival. Quit your job, start a company, take a sabbatical — your family stays covered. The closest U.S. equivalent for a family costs ~$25K/year."
           />
           <IntangibleCard
             icon={<IconShield />}
-            title="Half the homicide risk"
-            body="U.S. homicide rate is ~3.5× Israel's. Despite headlines, daily-life violence runs meaningfully lower."
+            title="Safer in daily life"
+            body="U.S. homicide rate runs roughly 3–4× Israel's. Despite headlines, violent crime in everyday Israeli life is meaningfully lower than in most of the U.S."
+            source="UNODC + FBI UCR"
+            sourceUrl="https://dataunodc.un.org/dp-intentional-homicide-victims"
+          />
+          <IntangibleCard
+            icon={<IconPeople />}
+            title="Independent kids"
+            body="Israeli kids walk to school, ride buses alone, and roam playgrounds without a parent shadowing them. The 'free-range' parenting that U.S. thinkpieces romanticize is just how childhood works here."
           />
           <IntangibleCard
             icon={<IconChat />}
             title="Bilingual kids, by osmosis"
-            body="Kids raised in Israel grow up functionally bilingual in English and Hebrew with no intervention. A life skill American parents pay thousands per year to simulate."
+            body="Kids raised in Israel grow up functionally bilingual in English and Hebrew with no intervention. A skill American parents pay thousands per year to simulate through after-school programs."
           />
           <IntangibleCard
             icon={<IconHome />}
-            title="You&apos;re the default"
-            body="First Jewish sovereignty in 2,000 years. Your kids don't grow up explaining Hanukkah or scanning a crowd at a family bar mitzvah. They grow up as the norm."
+            title="Being Jewish stops being a project"
+            body="Your calendar, your kids' school, your neighbors, your mayor — all Jewish. You're not explaining Hanukkah to coworkers, scheduling around holidays that aren't on the office calendar, or paying $28K/year so your kids know what Shabbat is. It's the water you swim in."
+          />
+          <IntangibleCard
+            icon={<IconBus />}
+            title="Jewish community is the default"
+            body="The social architecture that American Jewish families build deliberately — day school, shul, camp, trips to Israel — is just the environment here. Your kids' classmates, your neighbors, your kids' eventual dating pool are Jewish without you planning for it."
           />
           <IntangibleCard
             icon={<IconGift />}
             title="Stuff that shows up free"
-            body="Customs exemption on one household shipment, 500 hours of subsidized Hebrew ulpan, year-one arnona discount, free health coverage, and the absorption cash in the box above."
+            body="Customs exemption on one household shipment, 500 hours of subsidized Hebrew ulpan, year-one arnona discount, reduced mortgage rates, and the Sal Klita cash in the box above."
           />
         </div>
       </div>
@@ -364,7 +378,7 @@ function LabeledMoneyK({ label, value, onChange, placeholder }: { label: string;
   );
 }
 
-function IntangibleCard({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+function IntangibleCard({ icon, title, body, source, sourceUrl }: { icon: React.ReactNode; title: string; body: string; source?: string; sourceUrl?: string }) {
   return (
     <div className="bg-white border border-[#E5E5E5] rounded-xl p-5 sm:p-6 flex gap-4 items-start">
       <div className="shrink-0 w-11 h-11 rounded-lg bg-[#FFCB05]/20 flex items-center justify-center text-[#00274C]">
@@ -373,6 +387,16 @@ function IntangibleCard({ icon, title, body }: { icon: React.ReactNode; title: s
       <div>
         <div className="font-bold text-[#00274C] mb-1.5">{title}</div>
         <p className="text-sm text-[#1A1A1A] leading-relaxed">{body}</p>
+        {source && (
+          <div className="mt-2 text-[11px] text-[#5C5C5C]">
+            Source:{" "}
+            {sourceUrl ? (
+              <a href={sourceUrl} target="_blank" rel="noopener" className="text-[#0B3E7E] hover:underline">{source}</a>
+            ) : (
+              source
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -51,3 +51,24 @@ export function IconGift() {
     </svg>
   );
 }
+
+export function IconBus() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" {...stroke}>
+      <circle cx="9" cy="7" r="3" />
+      <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+      <circle cx="17" cy="9" r="2" />
+      <path d="M17 14a3 3 0 0 1 3 3v4" />
+    </svg>
+  );
+}
+
+export function IconPeople() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" {...stroke}>
+      <circle cx="12" cy="8" r="3" />
+      <path d="M12 12c-3 0-6 1.5-6 5v3h12v-3c0-3.5-3-5-6-5z" />
+      <path d="M5 7v4M3 9h4M19 7v4M17 9h4" />
+    </svg>
+  );
+}

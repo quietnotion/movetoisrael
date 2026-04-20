@@ -49,13 +49,22 @@ export const YEAR_2026 = {
   },
 
   salKlita: {
-    // Source: Misrad Haklita (Israeli Ministry of Aliyah & Integration) rates,
-    // indexed annually. 2025 rates: single oleh 21,194 NIS; payments are 6 monthly
-    // installments + airport cash + bank transfer. Family totals scale with kids
-    // by age. Estimates below average across age brackets at ILS 2.99/USD.
-    perSinglePersonUsd: 7000,
-    perCoupleUsd: 10500,
-    perChildUsd: 3000,
+    // Source: Misrad Haklita published rates (2025, indexed annually).
+    // Anchors confirmed from multiple sources:
+    //   - Single oleh (age 22+): 21,194 NIS
+    //   - Ordinary married couple (no kids): 37,802 NIS
+    //   - Family range: 19,829 to 46,513 NIS
+    // Child supplements are paid in three age brackets per the gov.il
+    // spec. Per-bracket amounts below are interpolated from the published
+    // couple baseline and max family figures; official NBN calculator is
+    // authoritative for edge cases.
+    singleOlehNis: 21194,
+    coupleNis: 37802,
+    perChildNisByAge: {
+      under4: 3000,
+      age4to17: 4500,
+      age18to21: 6000,
+    },
     customsExemptionYears: 3,
     arnonaDiscountYear1Percent: 0.90,
     arnonaDiscountYear2to3Percent: 0.75,
