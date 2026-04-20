@@ -40,6 +40,7 @@ jobs:
 
       - name: Open the refresh issue if missing
         if: steps.find.outputs.result == '0'
+        id: open
         uses: actions/github-script@v7
         with:
           script: |
@@ -65,13 +66,26 @@ jobs:
               ``,
               `When merged, flip \`CURRENT_TAX_YEAR\` in \`src/data/current.ts\` and update \`lastReviewed\` + \`nextScheduledRefresh\` in the new \`years/${year}.ts\`.`,
             ].join('\n');
-            await github.rest.issues.create({
+            const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `Annual tax-year refresh for ${year}`,
               body,
               labels: ['annual-refresh'],
             });
+            core.setOutput('issue_url', issue.data.html_url);
+            core.setOutput('issue_number', issue.data.number);
+
+      - name: Ping Slack on first open
+        if: steps.find.outputs.result == '0' && env.SLACK_TOKEN != ''
+        env:
+          SLACK_TOKEN: ${{ secrets.SLACK_ADMIN_TOKEN }}
+        run: |
+          YEAR='${{ steps.year.outputs.year }}'
+          URL='${{ steps.open.outputs.issue_url }}'
+          curl -s -H "Authorization: Bearer $SLACK_TOKEN" -H "Content-Type: application/json" \
+            -d "{\"channel\":\"C0ATWQCKUDT\",\"text\":\":calendar: *Annual tax-year refresh for $YEAR*\\nIssue opened. Data on the live site will go stale until the refresh PR merges.\\n$URL\"}" \
+            "https://slack.com/api/chat.postMessage" > /dev/null
 
       - name: Add a bump comment on the March reminder
         if: steps.find.outputs.result != '0'
@@ -85,3 +99,13 @@ jobs:
               issue_number: number,
               body: 'Second reminder: this refresh issue is still open. The data on the live site is aging.',
             });
+
+      - name: Ping Slack on March bump
+        if: steps.find.outputs.result != '0' && env.SLACK_TOKEN != ''
+        env:
+          SLACK_TOKEN: ${{ secrets.SLACK_ADMIN_TOKEN }}
+        run: |
+          YEAR='${{ steps.year.outputs.year }}'
+          curl -s -H "Authorization: Bearer $SLACK_TOKEN" -H "Content-Type: application/json" \
+            -d "{\"channel\":\"C0ATWQCKUDT\",\"text\":\":warning: Annual refresh for $YEAR is still open. Site data is aging — please schedule the review.\"}" \
+            "https://slack.com/api/chat.postMessage" > /dev/null
