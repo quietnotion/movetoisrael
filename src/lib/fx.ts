@@ -1,6 +1,11 @@
 import { CURRENT } from "@/data/current";
 import { logError } from "./alert";
 
+function isBenignFrameworkError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.includes("Dynamic server usage") || msg.includes("DYNAMIC_SERVER_USAGE");
+}
+
 export async function getUsdIlsRate(): Promise<number> {
   const fallback = CURRENT.israel.ilsPerUsdFallback;
   try {
@@ -25,7 +30,7 @@ export async function getUsdIlsRate(): Promise<number> {
     }
     return close;
   } catch (err) {
-    await logError("fx.stooq", err, { fallback });
+    if (!isBenignFrameworkError(err)) await logError("fx.stooq", err, { fallback });
     return fallback;
   }
 }

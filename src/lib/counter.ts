@@ -41,6 +41,15 @@ export async function incrementCalculation(): Promise<number> {
   }
 }
 
+function isBenignFrameworkError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return (
+    msg.includes("Dynamic server usage") ||
+    msg.includes("Route / couldn") ||
+    msg.includes("DYNAMIC_SERVER_USAGE")
+  );
+}
+
 export async function getTotalCount(): Promise<number> {
   const c = client();
   if (!c) return 0;
@@ -48,7 +57,7 @@ export async function getTotalCount(): Promise<number> {
     const v = await c.get<number>(TOTAL_KEY);
     return typeof v === "number" ? v : parseInt(String(v ?? 0), 10) || 0;
   } catch (err) {
-    await logError("counter.getTotal", err);
+    if (!isBenignFrameworkError(err)) await logError("counter.getTotal", err);
     return 0;
   }
 }
@@ -60,7 +69,7 @@ export async function getMonthCount(d = new Date()): Promise<number> {
     const v = await c.get<number>(monthKey(d));
     return typeof v === "number" ? v : parseInt(String(v ?? 0), 10) || 0;
   } catch (err) {
-    await logError("counter.getMonth", err);
+    if (!isBenignFrameworkError(err)) await logError("counter.getMonth", err);
     return 0;
   }
 }
@@ -79,7 +88,7 @@ export async function getAllMonthlyCounts(): Promise<Record<string, number>> {
     });
     return result;
   } catch (err) {
-    await logError("counter.listMonthly", err);
+    if (!isBenignFrameworkError(err)) await logError("counter.listMonthly", err);
     return {};
   }
 }

@@ -4,7 +4,7 @@ import { getUsdIlsRate } from "@/lib/fx";
 import { getTotalCount } from "@/lib/counter";
 import { CURRENT } from "@/data/current";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const [fxRate, totalCount] = await Promise.all([
