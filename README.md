@@ -52,6 +52,10 @@ PRs welcome. Especially helpful:
 
 Please open an issue first for anything larger than a typo fix.
 
+## Copying the calculator
+
+You're encouraged to copy this calculator and embed it in your own sites or applications. Tax numbers, oleh benefit thresholds, and Sal Klita amounts get refreshed every year — please plan to pull a new version at least annually so your visitors aren't seeing stale data. See [PROJECT.md](PROJECT.md#annual-refresh) for the refresh cadence.
+
 ## License
 
 [MIT](LICENSE). Built by [Quiet Notion](https://quietnotion.com).
