@@ -11,15 +11,24 @@ export async function getUsdIlsRate(): Promise<number> {
   try {
     const res = await fetch("https://stooq.com/q/l/?s=usdils&f=sd2t2ohlcv&h&e=csv", {
       next: { revalidate: 3600 },
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        Accept: "text/csv,text/plain,*/*",
+      },
     });
     if (!res.ok) {
       await logError("fx.stooq", `Non-OK HTTP status: ${res.status}`, { fallback });
       return fallback;
     }
     const text = await res.text();
-    const lines = text.trim().split("\n");
+    const lines = text.trim().split(/\r?\n/);
     if (lines.length < 2) {
-      await logError("fx.stooq", "Malformed CSV response", { lines: lines.length, fallback });
+      await logError("fx.stooq", "Malformed CSV response", {
+        lines: lines.length,
+        bodySnippet: text.slice(0, 200),
+        fallback,
+      });
       return fallback;
     }
     const fields = lines[1].split(",");
