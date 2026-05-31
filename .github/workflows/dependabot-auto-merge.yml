@@ -17,25 +17,29 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Note: no `gh pr review --approve` step. GitHub hard-blocks Actions from
-      # approving PRs, and there is no branch protection requiring a review, so
-      # the approval is both impossible and unnecessary.
+      # No `gh pr review --approve` step: GitHub hard-blocks Actions from
+      # approving PRs ("GitHub Actions is not permitted to approve pull
+      # requests"), and no branch protection requires a review anyway. The
+      # approve call was the original bug: it errored and killed the job before
+      # the merge ran.
       #
-      # `--auto` only sticks when the PR has a pending merge requirement (a
-      # required check/review) to wait on. This repo has no branch protection,
-      # so once checks settle the PR is immediately mergeable and `--auto`
-      # errors with "Pull request is in clean status". The `|| gh pr merge`
-      # fallback does an immediate squash merge in that case. Either path merges.
+      # No `--auto` either: this repo has no required status checks, so there is
+      # nothing for auto-merge to wait on. An immediate squash merge is the same
+      # call that merges these PRs reliably by hand. Trade-off: a bad bump can
+      # land on main without waiting for Vercel, which is acceptable for
+      # patch/minor + Actions bumps (Vercel never promotes a failing build to
+      # production). To gate on Vercel, make it a required check via a ruleset
+      # and switch to `--auto` (a required check also gates direct pushes).
       - name: Auto-merge npm patch + minor
         if: steps.meta.outputs.package-ecosystem == 'npm_and_yarn' && (steps.meta.outputs.update-type == 'version-update:semver-patch' || steps.meta.outputs.update-type == 'version-update:semver-minor')
-        run: gh pr merge --auto --squash "$PR_URL" || gh pr merge --squash "$PR_URL"
+        run: gh pr merge --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Auto-merge GitHub Actions (all bumps, first-party only)
         if: steps.meta.outputs.package-ecosystem == 'github_actions'
-        run: gh pr merge --auto --squash "$PR_URL" || gh pr merge --squash "$PR_URL"
+        run: gh pr merge --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
