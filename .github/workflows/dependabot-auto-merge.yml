@@ -17,20 +17,19 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Note: no `gh pr review --approve` step. GitHub hard-blocks Actions from
+      # approving PRs, and there is no branch protection requiring a review, so
+      # the approval is both impossible and unnecessary. Enabling auto-merge is enough.
       - name: Auto-merge npm patch + minor
         if: steps.meta.outputs.package-ecosystem == 'npm_and_yarn' && (steps.meta.outputs.update-type == 'version-update:semver-patch' || steps.meta.outputs.update-type == 'version-update:semver-minor')
-        run: |
-          gh pr review --approve "$PR_URL"
-          gh pr merge --auto --squash "$PR_URL"
+        run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Auto-merge GitHub Actions (all bumps, first-party only)
         if: steps.meta.outputs.package-ecosystem == 'github_actions'
-        run: |
-          gh pr review --approve "$PR_URL"
-          gh pr merge --auto --squash "$PR_URL"
+        run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
