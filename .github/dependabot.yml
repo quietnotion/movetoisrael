@@ -10,6 +10,14 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      # TypeScript 7.x is the native (Go) compiler rewrite. Next.js 16.2's
+      # type-verification step cannot load it, so the major bump breaks the
+      # Vercel build (see closed PR #30, Jul 2026). Hold the major back until
+      # Next.js officially supports TS 7. Minor and patch updates (5.x, 6.x)
+      # still flow through normally. Remove this entry once Next.js supports TS 7.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
