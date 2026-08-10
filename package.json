@@ -8,9 +8,9 @@
     "start": "next start"
   },
   "dependencies": {
-    "@next/third-parties": "^16.2.12",
-    "@upstash/redis": "^1.38.1",
-    "next": "16.2.12",
+    "@next/third-parties": "^16.3.0",
+    "@upstash/redis": "^1.38.2",
+    "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
